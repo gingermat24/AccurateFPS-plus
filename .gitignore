@@ -1,0 +1,36 @@
+# Gradle
+.gradle/
+build/
+out/
+*.jar
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Minecraft
+run/
+.minecraft/
+
+# Environment
+*.env
+.env.local
+
+# OSX
+*.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Misc
+.classpath
+.project
+.settings/
+*.orig
