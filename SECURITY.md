@@ -2,57 +2,51 @@
 
 ## Reporting Security Issues
 
-If you discover a security vulnerability in AccurateFPS+, please **do not** open a public GitHub issue.
+If you discover a security vulnerability in AccurateFPS+, please **do not open a public GitHub issue**.
 
-Instead, please report the issue privately:
+Instead, report it privately through the contact methods available on the official AccurateFPS+ Modrinth profile.
 
-- **Discord:** `matteo.sb`
-- **Email:** Contact via Modrinth profile
+Please include, if possible:
 
-Please include:
-- A clear description of the vulnerability
-- Steps to reproduce (if applicable)
-- Potential impact
-- Suggested fix (if you have one)
-
----
+* A clear description of the vulnerability
+* Steps to reproduce the issue
+* The potential impact
+* Any suggested fix or mitigation
 
 ## Scope
 
 This security policy applies to:
-- The AccurateFPS+ mod itself
-- Official releases on GitHub and Modrinth
 
-This policy does **not** cover:
-- Third-party mods or libraries
-- Users' own configurations or installations
-- Issues related to dependency mods (Fabric API, Cloth Config, etc.)
+* The AccurateFPS+ mod
+* Official AccurateFPS+ releases distributed through GitHub and Modrinth
 
----
+This policy does not cover:
+
+* Third-party mods or libraries
+* Fabric API or other dependencies
+* User-created configurations or installations
+* Vulnerabilities originating entirely from dependency mods
+
+Security issues in third-party dependencies should be reported to their respective maintainers.
 
 ## Responsible Disclosure
 
-We follow responsible disclosure practices:
+Please allow reasonable time for an issue to be investigated and, where necessary, fixed before publicly disclosing security details.
 
-1. **Receipt Acknowledgment** - You'll receive acknowledgment within 48 hours.
-2. **Investigation** - We'll investigate and determine the impact.
-3. **Fix Development** - We'll work on a fix.
-4. **Coordinated Release** - We'll release a patched version with credit to the reporter (unless you prefer anonymity).
-
----
+When appropriate, security fixes will be released through the normal AccurateFPS+ release channels and documented in the changelog.
 
 ## Security Updates
 
-Security patches will be released as soon as possible and prioritized over feature releases. Updates will be clearly marked as security fixes in the changelog.
+Security fixes will be prioritized appropriately and released as soon as reasonably possible.
 
----
+Security-related changes may be identified in the changelog when relevant.
 
-## General Security Notes
+## Official Downloads
 
-- Always download AccurateFPS+ from official sources:
-  - [Modrinth](https://modrinth.com/project/AQGahqU5)
-  - [GitHub Releases](https://github.com/gingermat24/AccurateFPS-plus/releases)
-- Keep your mod and dependencies up to date.
-- Report suspicious or unofficial distributions.
+To reduce the risk of downloading modified or unofficial copies, use the official AccurateFPS+ pages:
 
-Thank you for helping keep AccurateFPS+ secure!
+* Modrinth: https://modrinth.com/project/AQGahqU5
+* GitHub Releases: https://github.com/gingermat24/AccurateFPS-plus/releases
+
+Keep AccurateFPS+ and its dependencies up to date.
+
