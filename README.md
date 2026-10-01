@@ -118,7 +118,8 @@ AccurateFPS+ automatically detects compatible FPS limiter integrations and avoid
 ## Links & Modpack Policy
 
 - **[Modrinth](https://modrinth.com/project/AQGahqU5)**
-- **[Git Hub](https://github.com/gingermat24/AccurateFPS-plus)**
+- **[GitHub](https://github.com/gingermat24/AccurateFPS-plus)**
+- **[GitHub Releases](https://github.com/gingermat24/AccurateFPS-plus/releases)**
 - Contact: Discord (`matteo.sb`)
 
 **MIT LICENSE** - Source code will be posted soon on GitHub.
