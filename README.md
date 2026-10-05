@@ -120,7 +120,7 @@ Optional mods and rendering combinations are not all tested together. Compatibil
 
 ## Links & Modpack Policy
 
-> **Modrinth is the recommended source for downloads.** It currently hosts the published `1.1-r1` files; `1.2-r1` is not yet published.
+> **Modrinth is the recommended source for downloads, as releases are published there first and more frequently. Dowload from the link below :** 
 
 - **[Modrinth](https://modrinth.com/project/AQGahqU5)**
 - **[GitHub](https://github.com/gingermat24/AccurateFPS-plus)**
