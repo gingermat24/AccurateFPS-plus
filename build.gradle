@@ -130,7 +130,7 @@ def build1211 = tasks.register("build1211", Exec) {
 	description = "Builds the Minecraft 1.21.1 version of AccurateFPS+"
 	workingDir = file("mc1211")
 	if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
-		commandLine 'cmd', '/c', 'gradlew.bat', 'clean', 'build'
+		commandLine 'cmd', '/c', '.\\gradlew.bat', 'clean', 'build'
 	} else {
 		commandLine './gradlew', 'clean', 'build'
 	}
