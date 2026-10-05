@@ -125,7 +125,7 @@ publishing {
 	}
 }
 
-tasks.register("build1211", Exec) {
+def build1211 = tasks.register("build1211", Exec) {
 	group = "build"
 	description = "Builds the Minecraft 1.21.1 version of AccurateFPS+"
 	workingDir = file("mc1211")
@@ -136,8 +136,28 @@ tasks.register("build1211", Exec) {
 	}
 }
 
+def copy1211Jar = tasks.register("copy1211Jar", Copy) {
+	group = "build"
+	description = "Copies the Minecraft 1.21.1 release jar into build/libs"
+	dependsOn build1211
+
+	def artifact = file("mc1211/build/libs/accuratefpsplus-1.21.1-${project.version}-fabric.jar")
+	from(artifact)
+	into(layout.buildDirectory.dir("libs"))
+
+	doFirst {
+		if (!artifact.isFile()) {
+			throw new GradleException("Minecraft 1.21.1 jar was not produced: ${artifact}")
+		}
+	}
+}
+
+tasks.named("build") {
+	dependsOn copy1211Jar
+}
+
 tasks.register("buildAllVersions") {
 	group = "build"
-	description = "Builds AccurateFPS+ for Minecraft 1.21.11 and 1.21.1"
-	dependsOn "build", "build1211"
+	description = "Builds both supported Minecraft versions into build/libs"
+	dependsOn "build"
 }

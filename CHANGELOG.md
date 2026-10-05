@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.2-r1 (Unreleased)
+## 1.2-r1 - 05/10/2026
 
 - Added a client-side public API (`com.accuratefpsplus.api.AccurateFpsApi`) for companion and third-party mods to read the live HUD metrics: FPS, AVG, MAX, MIN, 1% Low, 0.1% Low, and Frametime.
 - Added a real-time Frametime metric (`ms`) to monitor measured frame duration alongside framerate.
@@ -24,7 +24,7 @@
 - Kept Cloth Config, YACL, and Sodium compile-time optional; added opt-in local runtime profiles for testing each integration independently.
 - Switched telemetry window timing to the monotonic clock and report measured frametime consistently on both supported Minecraft versions.
 - Reported FPS-limit and settings-file I/O failures and preserved unreadable settings instead of silently replacing them with defaults.
-- Removed the machine-specific jar-copy step; CI now builds both supported Minecraft targets with Java 21.
+- Updated the root build to build both supported Minecraft targets and place both release jars in `build/libs`; CI uploads that shared output folder.
 
 ## 1.1-r1
 

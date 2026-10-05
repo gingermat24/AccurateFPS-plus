@@ -29,4 +29,3 @@ jobs:
           name: Artifacts
           path: |
             build/libs/
-            mc1211/build/libs/
