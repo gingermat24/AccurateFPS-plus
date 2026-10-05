@@ -3,6 +3,8 @@
 build/
 out/
 *.jar
+!gradle/wrapper/gradle-wrapper.jar
+!mc1211/gradle/wrapper/gradle-wrapper.jar
 
 # IDE
 .idea/
