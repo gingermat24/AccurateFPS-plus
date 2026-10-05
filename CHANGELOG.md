@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.2-r1 (Unreleased)
+## 1.2-r1 - 05/10/2026
 
 - Added a client-side public API (`com.accuratefpsplus.api.AccurateFpsApi`) for companion and third-party mods to read the live HUD metrics: FPS, AVG, MAX, MIN, 1% Low, 0.1% Low, and Frametime.
 - Added a real-time Frametime metric (`ms`) to monitor measured frame duration alongside framerate.
