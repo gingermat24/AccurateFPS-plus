@@ -1,0 +1,58 @@
+{
+	"schemaVersion": 1,
+	"id": "accuratefpsplus",
+	"version": "${version}",
+	"name": "AccurateFPS+",
+	"description": "Lightweight, configurable performance HUD with precise FPS, AVG, MAX, and MIN telemetry.",
+	"authors": [
+		"gingermat"
+	],
+	"license": "MIT",
+	"environment": "client",
+	"contact": {
+		"homepage": "https://modrinth.com/mod/accuratefpsplus",
+		"issues": "https://github.com/gingermat24/AccurateFPS-plus/issues"
+	},
+	"custom": {
+		"modmenu": {
+			"links": {
+				"Modrinth": "https://modrinth.com/mod/accuratefpsplus"
+			}
+		}
+	},
+	"accessWidener": "accuratefpsplus.accesswidener",
+	"icon": "assets/accuratefpsplus/icon.png",
+	"entrypoints": {
+		"client": [
+			"com.accuratefpsplus.AccurateFpsPlusClient"
+		],
+		"modmenu": [
+			"com.accuratefpsplus.modmenu.ModMenuIntegration"
+		]
+	},
+	"mixins": [
+		{
+			"config": "accuratefpsplus.client.mixins.json",
+			"environment": "client"
+		},
+		{
+			"config": "accuratefpsplus.sodium.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.16.14",
+		"minecraft": "1.21.11",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"cloth-config2": "*",
+		"yet_another_config_lib_v3": "*",
+		"modmenu": "*",
+		"sodium": "*",
+		"sodiumfpscapfix": "*",
+		"iris": "*",
+		"immediatelyfast": "*"
+	}
+}
