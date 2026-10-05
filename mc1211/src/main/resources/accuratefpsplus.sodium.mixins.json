@@ -1,0 +1,13 @@
+{
+  "required": false,
+  "package": "com.accuratefpsplus.mixin.sodium",
+  "plugin": "com.accuratefpsplus.mixin.sodium.SodiumMixinPlugin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "SodiumConfigBuilderMixin",
+    "SodiumControlValueFormatterImplsMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}
