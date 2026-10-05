@@ -117,11 +117,10 @@ AccurateFPS+ automatically detects compatible FPS limiter integrations and avoid
 
 ## Links & Modpack Policy
 
-> **Modrinth is the recommended source for downloads**, as releases are published there first and more frequently.
+> **Modrinth is the recommended source for downloads**, as releases are published there first and more frequently. Dowload from the link below :
 
 - **[Modrinth](https://modrinth.com/project/AQGahqU5)**
 - **[GitHub](https://github.com/gingermat24/AccurateFPS-plus)**
-- **[GitHub Releases](https://github.com/gingermat24/AccurateFPS-plus/releases)**
 - Contact: Discord (`matteo.sb`)
 
 **MIT LICENSE** - Source code will be posted soon on GitHub.
