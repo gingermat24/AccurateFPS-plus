@@ -32,8 +32,7 @@ public class YaclConfigScreen {
             .title(Component.translatable("title.accuratefpsplus.config"))
             .save(() -> {
                 if (selectedPreset[0] > 0 && selectedPreset[0] != initialPreset) {
-                    applyPreset(selectedPreset[0]);
-                    AccurateFpsPlusClient.currentPreset = selectedPreset[0];
+                    AccurateFpsPlusClient.applyHudPreset(selectedPreset[0]);
                 } else if (customVisibilityChanged[0]) {
                     AccurateFpsPlusClient.currentPreset = 0;
                 }
@@ -54,7 +53,7 @@ public class YaclConfigScreen {
             .option(Option.<Boolean>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus.hideWithF3"))
                 .description(OptionDescription.of(Component.translatable("tooltip.accuratefpsplus.hideWithF3")))
-                .binding(false, () -> AccurateFpsPlusClient.hideWithF3, v -> AccurateFpsPlusClient.hideWithF3 = v)
+                .binding(true, () -> AccurateFpsPlusClient.hideWithF3, v -> AccurateFpsPlusClient.hideWithF3 = v)
                 .controller(TickBoxControllerBuilder::create)
                 .build())
             .option(Option.<Integer>createBuilder()
@@ -453,39 +452,4 @@ public class YaclConfigScreen {
         };
     }
 
-    private static void applyPreset(int value) {
-        switch (value) {
-            case 1 -> {
-                AccurateFpsPlusClient.showFps = true;
-                AccurateFpsPlusClient.showFrametime = false;
-                AccurateFpsPlusClient.showAvr = false;
-                AccurateFpsPlusClient.showMax = false;
-                AccurateFpsPlusClient.showMin = false;
-                AccurateFpsPlusClient.showOnePercentLow = false;
-                AccurateFpsPlusClient.showZeroOnePercentLow = false;
-            }
-            case 2 -> {
-                AccurateFpsPlusClient.showFps = true;
-                AccurateFpsPlusClient.showFrametime = false;
-                AccurateFpsPlusClient.showAvr = true;
-                AccurateFpsPlusClient.showMax = false;
-                AccurateFpsPlusClient.showMin = false;
-                AccurateFpsPlusClient.showOnePercentLow = true;
-                AccurateFpsPlusClient.showZeroOnePercentLow = false;
-            }
-            case 3 -> {
-                AccurateFpsPlusClient.showFps = true;
-                AccurateFpsPlusClient.showFrametime = true;
-                AccurateFpsPlusClient.showAvr = true;
-                AccurateFpsPlusClient.showMax = true;
-                AccurateFpsPlusClient.showMin = true;
-                AccurateFpsPlusClient.showOnePercentLow = true;
-                AccurateFpsPlusClient.showZeroOnePercentLow = true;
-            }
-            default -> {
-                return;
-            }
-        }
-        AccurateFpsPlusClient.markHudDirty();
-    }
 }

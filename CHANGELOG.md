@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2-r2 - 08/10/2026
+
+- Added an unbound-by-default keybind to cycle through the Minimal, Competitive, and Detailed HUD presets in-game; preset changes are saved immediately.
+- Enabled Hide with F3 by default for new installations while preserving existing saved preferences.
+- Updated the Gradle wrapper to 9.8.1 and Fabric Loom to 1.18.3 for both supported Minecraft targets.
+- Updated the JUnit BOM to 6.1.3 for both target builds.
+- Confirmed the existing Fabric Loader, Fabric API, Mod Menu, Cloth Config, Sodium, and YACL pins are the latest stable releases compatible with their respective Minecraft targets.
+
 ## 1.2-r1 - 05/10/2026
 
 - Added a client-side public API (`com.accuratefpsplus.api.AccurateFpsApi`) for companion and third-party mods to read the live HUD metrics: FPS, AVG, MAX, MIN, 1% Low, 0.1% Low, and Frametime.
@@ -26,7 +34,7 @@
 - Reported FPS-limit and settings-file I/O failures and preserved unreadable settings instead of silently replacing them with defaults.
 - Updated the root build to build both supported Minecraft targets and place both release jars in `build/libs`; CI uploads that shared output folder.
 
-## 1.1-r1
+## 1.1-r1 - 27/09/2026
 
 - Replaced discrete color jumps with a smooth RGB gradient that dynamically blends across Low, Medium, and High colors. Every framerate value now has an accurate, smoothly transitioning color.
 - Added visual color pickers to customize all three gradient anchor points. Defaults: Low (`#FF5555` Red), Medium (`#FFFF55` Yellow), High (`#55FF55` Green).
@@ -39,7 +47,7 @@
 - Optimized percentile calculations (`quickSelect`) with median-of-three pivot selection and NaN sanitization, avoiding a full sort of the sample window.
 - Upgraded config storage with automatic migration for older settings, UTF-8 file encoding, and formatted JSON output.
 
-## 1.0-r2 Refabricated
+## 1.0-r2 Refabricated - 14/09/2026
 
 This release restored the Fabric 1.21.11 build from the previously published JAR after the original project files were lost. It updated the 1.21.11 target only.
 
@@ -50,3 +58,7 @@ This release restored the Fabric 1.21.11 build from the previously published JAR
 - Added Sodium compatibility for the max FPS slider.
 - Fixed `/accuratefps+ exportcsv` to generate proper comma-separated values.
 - Updated Cloth Config and Mod Menu integrations.
+
+## 1.0-r1 02/05/2026
+
+No changelog was provided.

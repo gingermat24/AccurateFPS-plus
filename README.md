@@ -16,6 +16,7 @@ A lightweight, client-side **FPS HUD** mod with an **extended framerate slider**
 * **Adaptive or Manual Coloring** - Let **Automatic** mode adapt color thresholds to gameplay performance using EMA baseline smoothing, or set exact thresholds in **Manual** mode.
 * **Deep HUD Customization** - Customize metric visibility, order, position, decimal precision, prefixes, suffixes, colors, text shadow, and background overlay.
 * **Presets** - Quickly switch between **Minimal, Competitive, Detailed, and Custom** HUD layouts.
+* **Preset Cycle Keybind** - Cycle through Minimal, Competitive, and Detailed presets in-game; the keybind starts unbound to avoid conflicts with other mods.
 * **Optional Config Screens** - Use Cloth Config or YetAnotherConfigLib (YACL) for in-game settings. Without either, the mod runs with its default settings and JSON configuration files.
 * **Client API** - Companion mods can read current telemetry through `com.accuratefpsplus.api.AccurateFpsApi`.
 * **Conflict Avoidance** - The framerate slider integration is skipped when specific known FPS-cap or textbox mod IDs are present; this avoids replacing those controls but does not guarantee compatibility with every FPS mod.
@@ -29,7 +30,8 @@ A lightweight, client-side **FPS HUD** mod with an **extended framerate slider**
 
 | Release | Minecraft | Loader |
 | :--- | :---: | :---: |
-| **`1.2-r1` (Latest)** | **1.21.11**, **1.21.1** | Fabric |
+| **`1.2-r2` (Latest)** | **1.21.11**, **1.21.1** | Fabric |
+| `1.2-r1` | 1.21.11, 1.21.1 | Fabric |
 | `1.1-r1` | 1.21.11, 1.21.1 | Fabric |
 | `1.0-r2 Refabricated` | 1.21.11 | Fabric |
 | `1.0-r1` | 1.21.1, 1.21.11 | Fabric, Forge, Quilt |
@@ -43,8 +45,8 @@ A lightweight, client-side **FPS HUD** mod with an **extended framerate slider**
 
 ### 1. General
 - **Enable HUD** - Toggle HUD visibility.
-- **HUD Toggle Keybind** - Configure the AccurateFPS+ keybind in Minecraft's Controls menu.
-- **Hide with F3** - Automatically hide the HUD while Minecraft's debug screen is active.
+- **HUD Toggle Keybinds** - Configure the HUD toggle and preset-cycle keys in Minecraft's Controls menu under AccurateFPS+. The preset-cycle key starts unbound so it cannot conflict with another mod's default shortcut.
+- **Hide with F3** - Automatically hide the HUD while Minecraft's debug screen is active; enabled by default for new installations.
 - **Preset Profile** - Choose Minimal, Competitive, Detailed, or Custom.
 - **HUD Anchor** - Top-Left, Top-Right, Bottom-Left, Bottom-Right, or Custom.
 - **X & Y Offsets** - Fine-tune the HUD position.
@@ -83,6 +85,8 @@ Each metric can be configured with:
 - **Refresh Intervals** - FPS and Frametime update together; AVG, MAX, MIN, 1% Low, and 0.1% Low have independent refresh intervals.
 
 </details>
+
+Use **Cycle HUD Preset** in the Controls menu to rotate **Minimal → Competitive → Detailed → Minimal**. Cycling from a Custom preset starts at Minimal. The selected preset is saved immediately.
 
 ---
 

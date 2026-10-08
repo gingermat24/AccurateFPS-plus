@@ -2,6 +2,7 @@
   "title.accuratefpsplus.config": "AccurateFPS+ Configuration",
   "category.accuratefpsplus.title": "AccurateFPS+",
   "key.accuratefpsplus.toggleHUD": "Toggle HUD",
+  "key.accuratefpsplus.cyclePreset": "Cycle HUD Preset",
 
   "category.accuratefpsplus.general": "General",
   "category.accuratefpsplus.coloring": "Coloring",
@@ -17,9 +18,9 @@
 
   "option.accuratefpsplus.toggleHUD": "Enable HUD",
   "option.accuratefpsplus.hideWithF3": "Hide with F3",
-  "tooltip.accuratefpsplus.hideWithF3": "Automatically hide the HUD when the F3 debug screen is open",
+  "tooltip.accuratefpsplus.hideWithF3": "Automatically hide the HUD when the F3 debug screen is open (enabled by default)",
   "option.accuratefpsplus.presetProfile": "Preset",
-  "tooltip.accuratefpsplus.presetProfile": "Quick-switch active metrics",
+  "tooltip.accuratefpsplus.presetProfile": "Quick-switch active metrics. The in-game preset cycle keybind moves through Minimal, Competitive, and Detailed.",
   "option.accuratefpsplus.anchorCorner": "HUD Anchor",
   "option.accuratefpsplus.xPos": "X Position",
   "option.accuratefpsplus.yPos": "Y Position",
