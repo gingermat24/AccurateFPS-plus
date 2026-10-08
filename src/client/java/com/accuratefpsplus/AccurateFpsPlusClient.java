@@ -37,6 +37,7 @@ implements ClientModInitializer {
     private static int cachedScreenWidth;
     private static int cachedScreenHeight;
     private static KeyMapping toggleHudKey;
+    private static KeyMapping cyclePresetKey;
     protected static boolean toggleHUD;
     protected static boolean hideWithF3;
     protected static int xPos;
@@ -131,10 +132,21 @@ implements ClientModInitializer {
         if (toggleHudKey != null) {
             KeyBindingHelper.registerKeyBinding(toggleHudKey);
         }
+        cyclePresetKey = createKeyMapping("key.accuratefpsplus.cyclePreset");
+        if (cyclePresetKey != null) {
+            KeyBindingHelper.registerKeyBinding(cyclePresetKey);
+        }
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (toggleHudKey != null && toggleHudKey.consumeClick()) {
                 toggleHUD = !toggleHUD;
                 ConfigManager.saveConfig();
+            }
+            while (cyclePresetKey != null && cyclePresetKey.consumeClick()) {
+                if (client.screen == null) {
+                    int nextPreset = currentPreset >= 1 && currentPreset < 3 ? currentPreset + 1 : 1;
+                    applyHudPreset(nextPreset);
+                    ConfigManager.saveConfig();
+                }
             }
         });
 
@@ -396,7 +408,49 @@ implements ClientModInitializer {
         cachedOverlayColorWithAlpha = alpha << 24 | overlayColor & 0xFFFFFF;
     }
 
+    static void applyHudPreset(int value) {
+        switch (value) {
+            case 1 -> {
+                showFps = true;
+                showFrametime = false;
+                showAvr = false;
+                showMax = false;
+                showMin = false;
+                showOnePercentLow = false;
+                showZeroOnePercentLow = false;
+            }
+            case 2 -> {
+                showFps = true;
+                showFrametime = false;
+                showAvr = true;
+                showMax = false;
+                showMin = false;
+                showOnePercentLow = true;
+                showZeroOnePercentLow = false;
+            }
+            case 3 -> {
+                showFps = true;
+                showFrametime = true;
+                showAvr = true;
+                showMax = true;
+                showMin = true;
+                showOnePercentLow = true;
+                showZeroOnePercentLow = true;
+            }
+            default -> {
+                return;
+            }
+        }
+        currentPreset = value;
+        telemetryEngine.setComputePercentiles(showOnePercentLow || showZeroOnePercentLow);
+        markHudDirty();
+    }
+
     private static KeyMapping createToggleKeyMapping() {
+        return createKeyMapping("key.accuratefpsplus.toggleHUD");
+    }
+
+    private static KeyMapping createKeyMapping(String translationKey) {
         try {
             Class<?> categoryClass = null;
             for (Class<?> nested : KeyMapping.class.getDeclaredClasses()) {
@@ -418,7 +472,7 @@ implements ClientModInitializer {
                         int.class,
                         categoryClass
                     );
-                    return ctor.newInstance("key.accuratefpsplus.toggleHUD", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), category);
+                    return ctor.newInstance(translationKey, InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), category);
                 }
             }
         } catch (Throwable ignored) {
@@ -431,7 +485,7 @@ implements ClientModInitializer {
                 int.class,
                 String.class
             );
-            return ctor.newInstance("key.accuratefpsplus.toggleHUD", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), "category.accuratefpsplus.title");
+            return ctor.newInstance(translationKey, InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), "category.accuratefpsplus.title");
         } catch (Throwable t) {
             return null;
         }
@@ -479,7 +533,7 @@ implements ClientModInitializer {
         cachedScreenWidth = -1;
         cachedScreenHeight = -1;
         toggleHUD = true;
-        hideWithF3 = false;
+        hideWithF3 = true;
         xPos = 5;
         yPos = 5;
         shadow = true;

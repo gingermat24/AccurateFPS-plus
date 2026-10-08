@@ -20,8 +20,7 @@ public class ConfigScreen {
         int[] selectedPreset = new int[]{initialPreset};
         ConfigBuilder builder = ConfigBuilder.create().setParentScreen(parent).setTitle((Component)Component.translatable((String)"title.accuratefpsplus.config")).setSavingRunnable(() -> {
             if (selectedPreset[0] > 0 && selectedPreset[0] != initialPreset) {
-                ConfigScreen.applyPreset(selectedPreset[0]);
-                AccurateFpsPlusClient.currentPreset = selectedPreset[0];
+                AccurateFpsPlusClient.applyHudPreset(selectedPreset[0]);
             }
             ConfigManager.saveConfig();
             AccurateFpsPlusClient.telemetryEngine.setComputePercentiles(AccurateFpsPlusClient.showOnePercentLow || AccurateFpsPlusClient.showZeroOnePercentLow);
@@ -32,7 +31,7 @@ public class ConfigScreen {
         general.addEntry((AbstractConfigListEntry)builder.entryBuilder().startBooleanToggle((Component)Component.translatable((String)"option.accuratefpsplus.toggleHUD"), AccurateFpsPlusClient.toggleHUD).setDefaultValue(true).setSaveConsumer(v -> {
             AccurateFpsPlusClient.toggleHUD = v;
         }).build());
-        general.addEntry((AbstractConfigListEntry)builder.entryBuilder().startBooleanToggle((Component)Component.translatable((String)"option.accuratefpsplus.hideWithF3"), AccurateFpsPlusClient.hideWithF3).setDefaultValue(false).setTooltip(new Component[]{Component.translatable((String)"tooltip.accuratefpsplus.hideWithF3")}).setSaveConsumer(v -> {
+        general.addEntry((AbstractConfigListEntry)builder.entryBuilder().startBooleanToggle((Component)Component.translatable((String)"option.accuratefpsplus.hideWithF3"), AccurateFpsPlusClient.hideWithF3).setDefaultValue(true).setTooltip(new Component[]{Component.translatable((String)"tooltip.accuratefpsplus.hideWithF3")}).setSaveConsumer(v -> {
             AccurateFpsPlusClient.hideWithF3 = v;
         }).build());
         general.addEntry((AbstractConfigListEntry)builder.entryBuilder().startIntSlider((Component)Component.translatable((String)"option.accuratefpsplus.presetProfile"), AccurateFpsPlusClient.currentPreset, 0, 3).setDefaultValue(1).setTextGetter(ConfigScreen::presetLabel).setSaveConsumer(v -> {
@@ -365,42 +364,6 @@ public class ConfigScreen {
             case 3 -> Component.translatable("value.accuratefpsplus.preset.detailed");
             default -> Component.literal(String.valueOf(value));
         };
-    }
-
-    protected static void applyPreset(int value) {
-        switch (value) {
-            case 1 -> {
-                AccurateFpsPlusClient.showFps = true;
-                AccurateFpsPlusClient.showFrametime = false;
-                AccurateFpsPlusClient.showAvr = false;
-                AccurateFpsPlusClient.showMax = false;
-                AccurateFpsPlusClient.showMin = false;
-                AccurateFpsPlusClient.showOnePercentLow = false;
-                AccurateFpsPlusClient.showZeroOnePercentLow = false;
-            }
-            case 2 -> {
-                AccurateFpsPlusClient.showFps = true;
-                AccurateFpsPlusClient.showFrametime = false;
-                AccurateFpsPlusClient.showAvr = true;
-                AccurateFpsPlusClient.showMax = false;
-                AccurateFpsPlusClient.showMin = false;
-                AccurateFpsPlusClient.showOnePercentLow = true;
-                AccurateFpsPlusClient.showZeroOnePercentLow = false;
-            }
-            case 3 -> {
-                AccurateFpsPlusClient.showFps = true;
-                AccurateFpsPlusClient.showFrametime = true;
-                AccurateFpsPlusClient.showAvr = true;
-                AccurateFpsPlusClient.showMax = true;
-                AccurateFpsPlusClient.showMin = true;
-                AccurateFpsPlusClient.showOnePercentLow = true;
-                AccurateFpsPlusClient.showZeroOnePercentLow = true;
-            }
-            default -> {
-                return;
-            }
-        }
-        AccurateFpsPlusClient.markHudDirty();
     }
 
     @FunctionalInterface
