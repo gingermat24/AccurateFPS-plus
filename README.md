@@ -24,7 +24,10 @@ A lightweight, client-side **FPS HUD** mod with an **extended framerate slider**
 All four current release jars provide the same player-facing HUD, metrics, settings, presets, keybinds, FPS slider, and optional Sodium integration. Loader entrypoints, game APIs, and dependency builds differ where required for Fabric, NeoForge, or the Minecraft version.
 
   ![preview of the All Metrics preset](https://cdn.modrinth.com/data/cached_images/14a662614a47160304e1bd56a96e22dd3d15b1ec.gif)
-  > "_All Metrics_" preset + _Fixed Auto-Coloring_ (before dynamic gradient) - v1.0-r1
+  > "_All Metrics_" preset + _Fixed Auto-Coloring_ (before dynamic gradient) - **v1.0-r1**
+
+  ![All  7 Metrics](https://cdn.modrinth.com/data/cached_images/8ff9e851312c58caf3633ba5ee912959c4eb9d73_0.webp)
+  > "_All Metrics_" preset + Dynamic Coloring on FPS - **v1.2-r1**
 
 ---
 
