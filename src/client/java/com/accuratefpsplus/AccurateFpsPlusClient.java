@@ -1,14 +1,10 @@
 package com.accuratefpsplus;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import java.nio.file.Path;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -17,9 +13,7 @@ import net.minecraft.util.FormattedCharSequence;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWVidMode;
 
-@Environment(EnvType.CLIENT)
-public class AccurateFpsPlusClient
-implements ClientModInitializer {
+public class AccurateFpsPlusClient {
     static final FpsTelemetryEngine telemetryEngine = new FpsTelemetryEngine();
 
     public static FpsTelemetryEngine getTelemetryEngine() {
@@ -120,84 +114,87 @@ implements ClientModInitializer {
     protected static int manualThresholdMed;
     protected static int manualThresholdHigh;
 
-    @Override
-    @SuppressWarnings("deprecation")
-    public void onInitializeClient() {
-        ConfigManager.loadConfig();
+    public static void initialize(Path configDirectory) {
+        ConfigManager.loadConfig(configDirectory);
         telemetryEngine.setCalculationMode(calculationMode);
         telemetryEngine.setComputePercentiles(showOnePercentLow || showZeroOnePercentLow);
         AccurateFpsPlusClient.updateCachedOverlayColor();
+    }
 
-        toggleHudKey = createToggleKeyMapping();
-        if (toggleHudKey != null) {
-            KeyBindingHelper.registerKeyBinding(toggleHudKey);
+    public static void setKeyMappings(KeyMapping toggleKey, KeyMapping presetCycleKey) {
+        toggleHudKey = toggleKey;
+        cyclePresetKey = presetCycleKey;
+    }
+
+    public static KeyMapping getToggleHudKeyMapping() {
+        return toggleHudKey;
+    }
+
+    public static KeyMapping getPresetCycleKeyMapping() {
+        return cyclePresetKey;
+    }
+
+    public static void onClientTick(Minecraft client) {
+        while (toggleHudKey != null && toggleHudKey.consumeClick()) {
+            toggleHUD = !toggleHUD;
+            ConfigManager.saveConfig();
         }
-        cyclePresetKey = createKeyMapping("key.accuratefpsplus.cyclePreset");
-        if (cyclePresetKey != null) {
-            KeyBindingHelper.registerKeyBinding(cyclePresetKey);
-        }
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (toggleHudKey != null && toggleHudKey.consumeClick()) {
-                toggleHUD = !toggleHUD;
+        while (cyclePresetKey != null && cyclePresetKey.consumeClick()) {
+            if (client.screen == null) {
+                int nextPreset = currentPreset >= 1 && currentPreset < 3 ? currentPreset + 1 : 1;
+                applyHudPreset(nextPreset);
                 ConfigManager.saveConfig();
             }
-            while (cyclePresetKey != null && cyclePresetKey.consumeClick()) {
-                if (client.screen == null) {
-                    int nextPreset = currentPreset >= 1 && currentPreset < 3 ? currentPreset + 1 : 1;
-                    applyHudPreset(nextPreset);
-                    ConfigManager.saveConfig();
-                }
-            }
-        });
+        }
+    }
 
-        HudRenderCallback.EVENT.register((context, tickCounter) -> {
-            Minecraft mc = Minecraft.getInstance();
-            if (!toggleHUD || mc.screen != null || (hideWithF3 && mc.getDebugOverlay() != null && mc.getDebugOverlay().showDebugScreen())) {
-                return;
-            }
-            telemetryEngine.onFrame(pollingRate, mainUpdateInterval, avrUpdateInterval, maxUpdateInterval, minUpdateInterval, onePercentLowUpdateInterval, zeroOnePercentLowUpdateInterval, (long)historyWindowSeconds * 1000L);
-            if (!telemetryEngine.hasData()) {
-                return;
-            }
-            HudSnapshot hud = AccurateFpsPlusClient.getOrBuildHudSnapshot(mc);
-            boolean hasMainMetrics = !hud.mainRawText.isEmpty();
-            boolean hasLowMetrics = !hud.lowRawText.isEmpty();
-            if (!hasMainMetrics && !hasLowMetrics) {
-                return;
-            }
+    public static void renderHud(GuiGraphics context) {
+        Minecraft mc = Minecraft.getInstance();
+        if (!toggleHUD || mc.screen != null || (hideWithF3 && mc.getDebugOverlay() != null && mc.getDebugOverlay().showDebugScreen())) {
+            return;
+        }
+        telemetryEngine.onFrame(pollingRate, mainUpdateInterval, avrUpdateInterval, maxUpdateInterval, minUpdateInterval, onePercentLowUpdateInterval, zeroOnePercentLowUpdateInterval, (long)historyWindowSeconds * 1000L);
+        if (!telemetryEngine.hasData()) {
+            return;
+        }
+        HudSnapshot hud = AccurateFpsPlusClient.getOrBuildHudSnapshot(mc);
+        boolean hasMainMetrics = !hud.mainRawText.isEmpty();
+        boolean hasLowMetrics = !hud.lowRawText.isEmpty();
+        if (!hasMainMetrics && !hasLowMetrics) {
+            return;
+        }
 
-            float lowScale = 0.75f;
-            int mainLineHeight = hasMainMetrics ? hud.fontHeight : 0;
-            int lowLineHeight = hasLowMetrics ? (int) Math.ceil(hud.fontHeight * lowScale) : 0;
-            int lineSpacing = (hasMainMetrics && hasLowMetrics) ? 2 : 0;
-            int totalHeight = mainLineHeight + lineSpacing + lowLineHeight;
-            int lowVisualWidth = hasLowMetrics ? (int) Math.ceil(hud.lowTextWidth * lowScale) : 0;
-            int maxWidth = Math.max(hasMainMetrics ? hud.mainTextWidth : 0, lowVisualWidth);
+        float lowScale = 0.75f;
+        int mainLineHeight = hasMainMetrics ? hud.fontHeight : 0;
+        int lowLineHeight = hasLowMetrics ? (int) Math.ceil(hud.fontHeight * lowScale) : 0;
+        int lineSpacing = (hasMainMetrics && hasLowMetrics) ? 2 : 0;
+        int totalHeight = mainLineHeight + lineSpacing + lowLineHeight;
+        int lowVisualWidth = hasLowMetrics ? (int) Math.ceil(hud.lowTextWidth * lowScale) : 0;
+        int maxWidth = Math.max(hasMainMetrics ? hud.mainTextWidth : 0, lowVisualWidth);
 
-            if (positionDirty || anchorCorner != 0) {
-                int screenW = mc.getWindow().getGuiScaledWidth();
-                int screenH = mc.getWindow().getGuiScaledHeight();
-                if (screenW != cachedScreenWidth || screenH != cachedScreenHeight) {
-                    cachedScreenWidth = screenW;
-                    cachedScreenHeight = screenH;
-                }
-                AccurateFpsPlusClient.computeRenderPos(maxWidth, totalHeight, cachedScreenWidth, cachedScreenHeight);
-                positionDirty = false;
+        if (positionDirty || anchorCorner != 0) {
+            int screenW = mc.getWindow().getGuiScaledWidth();
+            int screenH = mc.getWindow().getGuiScaledHeight();
+            if (screenW != cachedScreenWidth || screenH != cachedScreenHeight) {
+                cachedScreenWidth = screenW;
+                cachedScreenHeight = screenH;
             }
+            AccurateFpsPlusClient.computeRenderPos(maxWidth, totalHeight, cachedScreenWidth, cachedScreenHeight);
+            positionDirty = false;
+        }
 
-            int mainY = cachedRenderY;
-            int lowY = hasMainMetrics ? (cachedRenderY + mainLineHeight + lineSpacing) : cachedRenderY;
+        int mainY = cachedRenderY;
+        int lowY = hasMainMetrics ? (cachedRenderY + mainLineHeight + lineSpacing) : cachedRenderY;
 
-            if (darkModeOverlay) {
-                context.fill(cachedRenderX - 3, cachedRenderY - 3, cachedRenderX + maxWidth + 3, cachedRenderY + totalHeight + 3, cachedOverlayColorWithAlpha);
-            }
-            if (hasMainMetrics) {
-                context.drawString(mc.font, hud.mainOrderedText, cachedRenderX, mainY, -1, shadow);
-            }
-            if (hasLowMetrics) {
-                drawScaledText(context, mc.font, hud.lowOrderedText, cachedRenderX, lowY, lowScale, -1, shadow);
-            }
-        });
+        if (darkModeOverlay) {
+            context.fill(cachedRenderX - 3, cachedRenderY - 3, cachedRenderX + maxWidth + 3, cachedRenderY + totalHeight + 3, cachedOverlayColorWithAlpha);
+        }
+        if (hasMainMetrics) {
+            context.drawString(mc.font, hud.mainOrderedText, cachedRenderX, mainY, -1, shadow);
+        }
+        if (hasLowMetrics) {
+            drawScaledText(context, mc.font, hud.lowOrderedText, cachedRenderX, lowY, lowScale, -1, shadow);
+        }
     }
 
 
@@ -446,11 +443,11 @@ implements ClientModInitializer {
         markHudDirty();
     }
 
-    private static KeyMapping createToggleKeyMapping() {
+    public static KeyMapping createToggleKeyMapping() {
         return createKeyMapping("key.accuratefpsplus.toggleHUD");
     }
 
-    private static KeyMapping createKeyMapping(String translationKey) {
+    public static KeyMapping createKeyMapping(String translationKey) {
         try {
             Class<?> categoryClass = null;
             for (Class<?> nested : KeyMapping.class.getDeclaredClasses()) {
@@ -671,7 +668,6 @@ implements ClientModInitializer {
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
     private record HudSnapshot(Component mainText, FormattedCharSequence mainOrderedText, String mainRawText, Component lowText, FormattedCharSequence lowOrderedText, String lowRawText, int mainTextWidth, int lowTextWidth, int fontHeight) {
     }
 }

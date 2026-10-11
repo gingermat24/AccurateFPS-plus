@@ -1,12 +1,19 @@
 # Changelog
 
-## 1.2-r2 - 08/10/2026
+## 1.2-r2 - 12/10/2026
 
+- Added separate NeoForge release jars for Minecraft 1.21.1 and 1.21.11, while retaining the existing Fabric jars and the `1.2-r2` version.
+- Ported the HUD, all seven telemetry metrics, settings, presets, keybinds, F3 behavior, precise FPS slider, and optional Sodium slider integration to NeoForge.
+- Added a NeoForge Mods-list settings button with a built-in configuration screen when neither optional UI library is installed; Cloth Config and YACL screens remain supported when available.
 - Added an unbound-by-default keybind to cycle through the Minimal, Competitive, and Detailed HUD presets in-game; preset changes are saved immediately.
 - Enabled Hide with F3 by default for new installations while preserving existing saved preferences.
+- Preserved saved FPS limits above the vanilla slider cap by installing the extended range before Minecraft loads its options.
+- Pinned NeoForge 1.21.1 to 21.1.259 and 1.21.11 to 21.11.45; defer optional-mod discovery until the loader has initialized its mod list.
+- Split loader initialization from shared HUD/configuration behavior and made the FPS slider and Sodium integrations use loader-specific mod/config services.
+- Verified player-facing feature parity across all four Minecraft-version/loader jars; only loader- and game-API adapters differ.
+- Added release-jar checks for shared feature classes, metadata, and loader-specific entrypoints; CI now publishes only the four runtime jars.
 - Updated the Gradle wrapper to 9.8.1 and Fabric Loom to 1.18.3 for both supported Minecraft targets.
 - Updated the JUnit BOM to 6.1.3 for both target builds.
-- Confirmed the existing Fabric Loader, Fabric API, Mod Menu, Cloth Config, Sodium, and YACL pins are the latest stable releases compatible with their respective Minecraft targets.
 
 ## 1.2-r1 - 05/10/2026
 

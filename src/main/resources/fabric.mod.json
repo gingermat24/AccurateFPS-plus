@@ -24,7 +24,7 @@
 	"icon": "assets/accuratefpsplus/icon.png",
 	"entrypoints": {
 		"client": [
-			"com.accuratefpsplus.AccurateFpsPlusClient"
+			"com.accuratefpsplus.AccurateFpsPlusFabricClient"
 		],
 		"modmenu": [
 			"com.accuratefpsplus.modmenu.ModMenuIntegration"

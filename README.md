@@ -17,9 +17,11 @@ A lightweight, client-side **FPS HUD** mod with an **extended framerate slider**
 * **Deep HUD Customization** - Customize metric visibility, order, position, decimal precision, prefixes, suffixes, colors, text shadow, and background overlay.
 * **Presets** - Quickly switch between **Minimal, Competitive, Detailed, and Custom** HUD layouts.
 * **Preset Cycle Keybind** - Cycle through Minimal, Competitive, and Detailed presets in-game; the keybind starts unbound to avoid conflicts with other mods.
-* **Optional Config Screens** - Use Cloth Config or YetAnotherConfigLib (YACL) for in-game settings. Without either, the mod runs with its default settings and JSON configuration files.
+* **In-Game Settings** - NeoForge includes a built-in settings screen; Cloth Config or YetAnotherConfigLib (YACL) provides an optional alternate screen on supported loaders. On Fabric, install either library to configure in-game.
 * **Client API** - Companion mods can read current telemetry through `com.accuratefpsplus.api.AccurateFpsApi`.
 * **Conflict Avoidance** - The framerate slider integration is skipped when specific known FPS-cap or textbox mod IDs are present; this avoids replacing those controls but does not guarantee compatibility with every FPS mod.
+
+All four current release jars provide the same player-facing HUD, metrics, settings, presets, keybinds, FPS slider, and optional Sodium integration. Loader entrypoints, game APIs, and dependency builds differ where required for Fabric, NeoForge, or the Minecraft version.
 
   ![preview of the All Metrics preset](https://cdn.modrinth.com/data/cached_images/14a662614a47160304e1bd56a96e22dd3d15b1ec.gif)
   > "_All Metrics_" preset + _Fixed Auto-Coloring_ (before dynamic gradient) - v1.0-r1
@@ -30,11 +32,13 @@ A lightweight, client-side **FPS HUD** mod with an **extended framerate slider**
 
 | Release | Minecraft | Loader |
 | :--- | :---: | :---: |
-| **`1.2-r2` (Latest)** | **1.21.11**, **1.21.1** | Fabric |
-| `1.2-r1` | 1.21.11, 1.21.1 | Fabric |
-| `1.1-r1` | 1.21.11, 1.21.1 | Fabric |
+| **`1.2-r2` (Latest)** | **1.21.1, 1.21.11** | Fabric, NeoForge |
+| `1.2-r1` | 1.21.1, 1.21.11 | Fabric |
+| `1.1-r1` | 1.21.1, 1.21.11 | Fabric |
 | `1.0-r2 Refabricated` | 1.21.11 | Fabric |
 | `1.0-r1` | 1.21.1, 1.21.11 | Fabric, Forge, Quilt |
+
+The build matrix uses Java 21, Fabric API **0.116.17+1.21.1** / **0.141.6+1.21.11**, and NeoForge **21.1.259** / **21.11.45** for Minecraft **1.21.1** / **1.21.11**, respectively. Optional library variants are loader- and Minecraft-specific.
 
 ---
 
@@ -105,26 +109,29 @@ These describe implementation choices; no FPS or memory improvement benchmark is
 
 ## Dependencies & Compatibility
 
-| Mod                                                                       | Status                                      |
-| ------------------------------------------------------------------------- | ------------------------------------------- |
-| [Fabric API](https://modrinth.com/mod/fabric-api)                         | 📦 **Required**                             |
-| [Cloth Config](https://modrinth.com/mod/cloth-config)                     | ⚙️ **Optional**                             |
-| [YetAnotherConfigLib (YACL)](https://modrinth.com/mod/yacl)               | ⚙️ **Optional**                             |
-| [Mod Menu](https://modrinth.com/mod/modmenu)                              | ✅ **Recommended**                            |
-| [Sodium](https://modrinth.com/mod/sodium)                                 | ✅ **Compatible**                             |
-| [Sodium FPS Cap Fix](https://modrinth.com/mod/sodiumfpscapfix)            | ✅ **Compatible**                             |
-| [Iris](https://modrinth.com/mod/iris)                                     | ✅ **Compatible**                             |
-| [ImmediatelyFast](https://modrinth.com/mod/immediatelyfast)               | ✅ **Compatible**                             |
+| Mod | Status |
+| --- | --- |
+| [Fabric API](https://modrinth.com/mod/fabric-api) | Required for Fabric jars |
+| NeoForge | Required for NeoForge jars |
+| [Cloth Config](https://modrinth.com/mod/cloth-config) | Optional settings screen; install the variant for your loader |
+| [YetAnotherConfigLib (YACL)](https://modrinth.com/mod/yacl) | Optional settings screen; install the variant for your loader |
+| [Mod Menu](https://modrinth.com/mod/modmenu) | Recommended for Fabric; NeoForge uses its native Mods-list config button |
+| [Sodium](https://modrinth.com/mod/sodium) | Optional FPS-control integration where the target Sodium API is supported; renderer compatibility depends on the loader and Sodium version |
+| [Sodium FPS Cap Fix](https://modrinth.com/mod/sodiumfpscapfix) | Compatible; AccurateFPS+ leaves the vanilla FPS slider to this mod |
+| [Iris](https://modrinth.com/mod/iris) | Compatible |
+| [ImmediatelyFast](https://modrinth.com/mod/immediatelyfast) | Compatible |
 
-If neither Cloth Config nor YACL is installed, AccurateFPS+ runs with its defaults and can load settings from `config/accuratefpsplus.json`. The custom framerate limit is stored separately in `config/accuratefpsplus-fps.json`.
+If neither Cloth Config nor YACL is installed, NeoForge still provides its built-in settings screen. On Fabric, settings can be loaded from `config/accuratefpsplus.json` without either library. The custom framerate limit is stored separately in `config/accuratefpsplus-fps.json`.
 
 Optional mods and rendering combinations are not all tested together. Compatibility can depend on the exact Minecraft version and mod versions.
+
+The NeoForge 1.21.11 development-client smoke test with Sodium 0.8.14 reached a world but then hit a `ValidationGpuTexture` to `GlTexture` cast failure inside Sodium's chunk renderer. AccurateFPS+ only changes Sodium's FPS controls, but this combination has not been isolated in a packaged runtime and is not claimed as verified.
 
 ---
 
 ## Links & Modpack Policy
 
-> **Modrinth is the recommended source for downloads, as releases are published there first and more frequently. Dowload from the link below :** 
+> **Modrinth is the recommended source for downloads, as releases are published there first and more frequently. Download the jar matching your Minecraft version and loader.**
 
 - **[Modrinth](https://modrinth.com/project/AQGahqU5)**
 - **[GitHub](https://github.com/gingermat24/AccurateFPS-plus)**

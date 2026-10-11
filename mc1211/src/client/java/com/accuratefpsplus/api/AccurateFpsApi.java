@@ -1,14 +1,11 @@
 package com.accuratefpsplus.api;
 
 import com.accuratefpsplus.AccurateFpsPlusClient;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 /**
  * Public, minimal, stable, zero-overhead API for AccurateFPS+.
  * External mods can read the exact live metrics displayed by the HUD with zero metric drift and zero object allocations.
  */
-@Environment(EnvType.CLIENT)
 public final class AccurateFpsApi {
     private AccurateFpsApi() {}
 

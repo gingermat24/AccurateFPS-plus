@@ -1,5 +1,6 @@
 package com.accuratefpsplus.mixin.client;
 
+import com.accuratefpsplus.AccurateFpsPlusPlatform;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -12,9 +13,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.client.Options;
@@ -31,7 +29,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Environment(EnvType.CLIENT)
 @Mixin(Options.class)
 public abstract class GameOptionsPreciseFpsMixin {
     @Unique
@@ -51,11 +48,10 @@ public abstract class GameOptionsPreciseFpsMixin {
 
     @Unique
     private static boolean accuratefpsplus$hasConflictingFpsMod() {
-        FabricLoader loader = FabricLoader.getInstance();
-        return loader.isModLoaded("sodiumfpscapfix")
-            || loader.isModLoaded("fpscapfix")
-            || loader.isModLoaded("fps-textbox")
-            || loader.isModLoaded("fpstextbox");
+        return AccurateFpsPlusPlatform.isModLoaded("sodiumfpscapfix")
+            || AccurateFpsPlusPlatform.isModLoaded("fpscapfix")
+            || AccurateFpsPlusPlatform.isModLoaded("fps-textbox")
+            || AccurateFpsPlusPlatform.isModLoaded("fpstextbox");
     }
 
     @Inject(method={"<init>"}, at={@At(value="TAIL")})
@@ -63,6 +59,22 @@ public abstract class GameOptionsPreciseFpsMixin {
         if (accuratefpsplus$hasConflictingFpsMod()) {
             return;
         }
+        accuratefpsplus$installMaxFpsOption();
+        int saved = GameOptionsPreciseFpsMixin.accuratefpsplus$readOurFps();
+        if (client != null && client.getWindow() != null) {
+            client.getWindow().setFramerateLimit(saved);
+        }
+    }
+
+    @Inject(method={"load"}, at={@At(value="HEAD")})
+    private void accuratefpsplus$prepareMaxFpsOptionForLoad(CallbackInfo ci) {
+        if (!accuratefpsplus$hasConflictingFpsMod()) {
+            accuratefpsplus$installMaxFpsOption();
+        }
+    }
+
+    @Unique
+    private void accuratefpsplus$installMaxFpsOption() {
         int saved = GameOptionsPreciseFpsMixin.accuratefpsplus$readOurFps();
         this.framerateLimit = new OptionInstance<>("options.framerateLimit", OptionInstance.noTooltip(), (caption, value) -> {
             if (value >= AFPS_MAX) {
@@ -76,9 +88,6 @@ public abstract class GameOptionsPreciseFpsMixin {
             }
             GameOptionsPreciseFpsMixin.accuratefpsplus$writeOurFps(value);
         });
-        if (client != null && client.getWindow() != null) {
-            client.getWindow().setFramerateLimit(saved);
-        }
     }
 
     @Inject(method={"load"}, at={@At(value="TAIL")})
@@ -96,7 +105,7 @@ public abstract class GameOptionsPreciseFpsMixin {
 
     @Unique
     private static Path accuratefpsplus$configPath() {
-        return FabricLoader.getInstance().getConfigDir().resolve("accuratefpsplus-fps.json");
+        return AccurateFpsPlusPlatform.configDirectory().resolve("accuratefpsplus-fps.json");
     }
 
     @Unique

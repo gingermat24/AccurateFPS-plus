@@ -1,13 +1,10 @@
 package com.accuratefpsplus.api;
 
 import com.accuratefpsplus.AccurateFpsPlusClient;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 /**
  * Lightweight client-side access to the live telemetry values displayed by the HUD.
  */
-@Environment(EnvType.CLIENT)
 public final class AccurateFpsApi {
     private AccurateFpsApi() {}
 
