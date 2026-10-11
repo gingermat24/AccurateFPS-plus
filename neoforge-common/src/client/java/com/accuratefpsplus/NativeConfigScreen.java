@@ -128,6 +128,9 @@ public final class NativeConfigScreen extends Screen {
                     AccurateFpsPlusClient.currentPreset = 0;
                 }
             }, 0, 3, NativeConfigScreen::presetLabel);
+        addInteger(PAGE_GENERAL, -1, row++, "option.accuratefpsplus.hudScale",
+            AccurateFpsPlusClient.hudScalePercent, 1, 200,
+            value -> AccurateFpsPlusClient.hudScalePercent = value);
         addCycle(PAGE_GENERAL, -1, row++, "option.accuratefpsplus.anchorCorner",
             () -> AccurateFpsPlusClient.anchorCorner, value -> AccurateFpsPlusClient.anchorCorner = value,
             0, 4, NativeConfigScreen::anchorLabel);
@@ -307,10 +310,10 @@ public final class NativeConfigScreen extends Screen {
                            BooleanSupplier getter, Consumer<Boolean> setter) {
         boolean[] value = {getter.getAsBoolean()};
         Component label = Component.translatable(labelKey);
-        Button button = Button.builder(toggleLabel(label, value[0]), widget -> {
+        Button button = Button.builder(toggleLabel(value[0]), widget -> {
             value[0] = !value[0];
             setter.accept(value[0]);
-            widget.setMessage(toggleLabel(label, value[0]));
+            widget.setMessage(toggleLabel(value[0]));
             this.validationMessage = null;
         }).bounds(controlX(), rowY(row), controlWidth(), 20).build();
         addControl(targetPage, targetMetric, row, label, button, () -> true);
@@ -321,10 +324,10 @@ public final class NativeConfigScreen extends Screen {
                           IntFunction<Component> formatter) {
         int[] value = {Math.max(min, Math.min(max, getter.getAsInt()))};
         Component label = Component.translatable(labelKey);
-        Button button = Button.builder(cycleLabel(label, formatter.apply(value[0])), widget -> {
+        Button button = Button.builder(formatter.apply(value[0]), widget -> {
             value[0] = value[0] >= max ? min : value[0] + 1;
             setter.accept(value[0]);
-            widget.setMessage(cycleLabel(label, formatter.apply(value[0])));
+            widget.setMessage(formatter.apply(value[0]));
             this.validationMessage = null;
         }).bounds(controlX(), rowY(row), controlWidth(), 20).build();
         addControl(targetPage, targetMetric, row, label, button, () -> true);
@@ -477,9 +480,10 @@ public final class NativeConfigScreen extends Screen {
         updateControlVisibility();
         graphics.fill(0, 0, this.width, this.height, 0xC0101010);
         super.render(graphics, mouseX, mouseY, partialTick);
-        graphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 0xFFFFFF);
+        graphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 0xFFFFFFFF);
         if (this.page != PAGE_METRICS) {
-            graphics.drawCenteredString(this.font, Component.translatable(PAGE_NAMES[this.page]), this.width / 2, 59, 0xFFFFFF);
+            graphics.drawCenteredString(this.font, Component.translatable(PAGE_NAMES[this.page]),
+                this.width / 2, 59, 0xFFFFFFFF);
         }
         Button selectedPage = this.pageButtons.get(this.page);
         graphics.fill(selectedPage.getX(), selectedPage.getY() + selectedPage.getHeight() - 2,
@@ -490,7 +494,7 @@ public final class NativeConfigScreen extends Screen {
                 int y = control.widget.getY();
                 graphics.fill(18, y + control.widget.getHeight() + 2, this.width - 18, y + control.widget.getHeight() + 3, 0x503F3F3F);
                 graphics.enableScissor(24, y, control.widget.getX() - 8, y + control.widget.getHeight());
-                graphics.drawString(this.font, control.label, 24, y + 6, 0xFFFFFF);
+                graphics.drawString(this.font, control.label, 24, y + 6, 0xFFFFFFFF);
                 graphics.disableScissor();
             }
         }
@@ -505,7 +509,8 @@ public final class NativeConfigScreen extends Screen {
             graphics.fill(this.width - 11, thumbY, this.width - 8, thumbY + thumbHeight, 0xFFB0B0B0);
         }
         if (this.validationMessage != null) {
-            graphics.drawCenteredString(this.font, this.validationMessage, this.width / 2, this.height - 47, 0xFF5555);
+            graphics.drawCenteredString(this.font, this.validationMessage,
+                this.width / 2, this.height - 47, 0xFFFF5555);
         }
     }
 
@@ -563,14 +568,10 @@ public final class NativeConfigScreen extends Screen {
         return HISTORY_WINDOWS.length - 1;
     }
 
-    private static Component toggleLabel(Component label, boolean enabled) {
-        return Component.empty().append(label).append(": ").append(Component.translatable(
+    private static Component toggleLabel(boolean enabled) {
+        return Component.translatable(
             enabled ? "value.accuratefpsplus.enabled" : "value.accuratefpsplus.disabled"
-        ));
-    }
-
-    private static Component cycleLabel(Component label, Component value) {
-        return Component.empty().append(label).append(": ").append(value);
+        );
     }
 
     private static Component presetLabel(int value) {

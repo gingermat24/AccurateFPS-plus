@@ -97,26 +97,83 @@ class FpsTelemetryEngineTest {
     }
 
     @Test
+    void framePercentilesCanDifferWithEnoughIrregularFrameSamples() {
+        FpsTelemetryEngine engine = new FpsTelemetryEngine(0L);
+        engine.setCalculationMode(1);
+        engine.setComputePercentiles(true);
+        long nowNanos = 0L;
+
+        for (int frame = 0; frame < 1_000; frame++) {
+            long frameDurationNanos = frame == 0 ? 200L * NANOS_PER_MILLI
+                : frame < 10 ? 100L * NANOS_PER_MILLI : 10L * NANOS_PER_MILLI;
+            nowNanos += frameDurationNanos;
+            engine.onFrameAt(nowNanos, 100, 1, 1, 1, 1, 1, 1, 60_000L);
+        }
+
+        assertEquals(10.0, engine.getDisplayedOnePercentLow(), 1e-9);
+        assertEquals(5.0, engine.getDisplayedZeroOnePercentLow(), 1e-9);
+    }
+
+    @Test
     void percentileQuickselectMatchesNearestRankForLargeSampleSets() {
         FpsTelemetryEngine engine = new FpsTelemetryEngine(0L);
         double[] expectedValues = new double[1_001];
         long nowNanos = 0L;
+        engine.setComputePercentiles(true);
 
-        for (int fps = 1; fps <= 1_000; fps++) {
+        for (int fps = 2; fps <= 1_001; fps++) {
             long frameDurationNanos = Math.round(1_000_000_000.0 / fps);
             nowNanos += frameDurationNanos;
-            expectedValues[fps - 1] = 1_000_000_000.0 / frameDurationNanos;
+            expectedValues[fps - 2] = 1_000_000_000.0 / frameDurationNanos;
             engine.onFrameAt(nowNanos, 1, 100_000, 100_000, 100_000, 100_000, 60_000, 60_000, 60_000L);
         }
 
         nowNanos += NANOS_PER_MILLI;
         expectedValues[1_000] = 1_000.0;
-        engine.setComputePercentiles(true);
         engine.onFrameAt(nowNanos, 1, 100_000, 100_000, 100_000, 100_000, 1, 1, 60_000L);
         Arrays.sort(expectedValues);
 
         assertEquals(nearestRank(expectedValues, 0.01), engine.getDisplayedOnePercentLow(), 1e-9);
         assertEquals(nearestRank(expectedValues, 0.001), engine.getDisplayedZeroOnePercentLow(), 1e-9);
+    }
+
+    @Test
+    void pausedTimeDoesNotEnterFrametimeOrRollingMetrics() {
+        FpsTelemetryEngine engine = new FpsTelemetryEngine(0L);
+        engine.setCalculationMode(0);
+        engine.setComputePercentiles(true);
+        tick(engine, 10L, 1, 1, 1_000L);
+
+        engine.pause();
+        tick(engine, 10_000L, 1, 1, 1_000L);
+        assertEquals(10.0, engine.getLastFrametimeMs(), 1e-9);
+        assertEquals(100.0, engine.getDisplayedMainFps(), 1e-9);
+
+        tick(engine, 10_020L, 1, 1, 1_000L);
+
+        assertEquals(20.0, engine.getLastFrametimeMs(), 1e-9);
+        assertEquals(50.0, engine.getDisplayedMainFps(), 1e-9);
+        assertEquals(50.0, engine.getDisplayedAverageFps(), 1e-9);
+        assertEquals(50.0, engine.getDisplayedMaxFps(), 1e-9);
+        assertEquals(50.0, engine.getDisplayedMinFps(), 1e-9);
+        assertEquals(50.0, engine.getDisplayedOnePercentLow(), 1e-9);
+        assertEquals(50.0, engine.getDisplayedZeroOnePercentLow(), 1e-9);
+    }
+
+    @Test
+    void activeGapOfOneSecondOrMoreIsIgnoredAndResetsTheBaseline() {
+        FpsTelemetryEngine engine = new FpsTelemetryEngine(0L);
+        engine.setCalculationMode(0);
+        tick(engine, 10L, 1, 1, 1_000L);
+
+        engine.onFrameAt(1_010L * NANOS_PER_MILLI, 1, 1, 1, 1, 1, 1, 1, 1_000L);
+        assertEquals(10.0, engine.getLastFrametimeMs(), 1e-9);
+
+        engine.onFrameAt(1_020L * NANOS_PER_MILLI, 1, 1, 1, 1, 1, 1, 1, 1_000L);
+
+        assertEquals(10.0, engine.getLastFrametimeMs(), 1e-9);
+        assertEquals(100.0, engine.getDisplayedMainFps(), 1e-9);
+        assertEquals(100.0, engine.getDisplayedAverageFps(), 1e-9);
     }
 
     @Test

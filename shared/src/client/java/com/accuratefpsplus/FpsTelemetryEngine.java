@@ -5,9 +5,16 @@ import java.util.Deque;
 
 public class FpsTelemetryEngine {
     private static final int NANOS_PER_MILLI = 1_000_000;
+    private static final long MAX_FRAME_GAP_NANOS = 1_000_000_000L;
+    private static final int INITIAL_PERCENTILE_CAPACITY = 256;
     private long pollTotalNanos;
     private int pollSampleCount;
     private final Deque<SamplePoint> sampledFps = new ArrayDeque<>();
+    private long[] percentileTimestamps = new long[INITIAL_PERCENTILE_CAPACITY];
+    private double[] percentileFrameFps = new double[INITIAL_PERCENTILE_CAPACITY];
+    private double[] percentileScratch = new double[0];
+    private int percentileStart;
+    private int percentileSize;
     private long lastFrameNanos;
     private long lastPollNanos;
     private long lastMainUpdateNanos;
@@ -35,6 +42,7 @@ public class FpsTelemetryEngine {
     private double dynamicHighThreshold = 120.0;
     private boolean computePercentiles = false;
     private boolean externalPercentilesRequested = false;
+    private boolean paused;
 
     public FpsTelemetryEngine() {
         this(System.nanoTime());
@@ -57,10 +65,12 @@ public class FpsTelemetryEngine {
 
     public void setComputePercentiles(boolean enabled) {
         this.computePercentiles = enabled;
+        this.clearPercentileFramesIfDisabled();
     }
 
     public void setExternalPercentilesRequested(boolean requested) {
         this.externalPercentilesRequested = requested;
+        this.clearPercentileFramesIfDisabled();
     }
 
     public int getCalculationMode() {
@@ -86,7 +96,18 @@ public class FpsTelemetryEngine {
             return;
         }
         this.lastFrameNanos = nowNanos;
+        if (this.paused || deltaNanos >= MAX_FRAME_GAP_NANOS) {
+            this.paused = false;
+            this.lastPollNanos = nowNanos;
+            this.pollTotalNanos = 0L;
+            this.pollSampleCount = 0;
+            return;
+        }
         this.lastFrametimeMs = (double)deltaNanos / 1000000.0;
+        boolean activePercentiles = this.computePercentiles || this.externalPercentilesRequested;
+        if (activePercentiles) {
+            this.addPercentileFrame(nowNanos, 1.0E9 / deltaNanos, historyWindowMillis);
+        }
         this.pollTotalNanos += deltaNanos;
         ++this.pollSampleCount;
         long elapsedSincePollMillis = (nowNanos - this.lastPollNanos) / 1000000L;
@@ -167,19 +188,33 @@ public class FpsTelemetryEngine {
                 ++this.displayRevision;
             }
         }
-        boolean activePercentiles = this.computePercentiles || this.externalPercentilesRequested;
-        if (activePercentiles && nowNanos - this.lastOnePercentLowUpdateNanos >= (long)onePercentLowIntervalMillis * NANOS_PER_MILLI) {
-            cutoffNanos = nowNanos - historyWindowMillis * NANOS_PER_MILLI;
-            this.displayedOnePercentLow = this.computePercentileLow(cutoffNanos, 0.01);
-            ++this.displayRevision;
-            this.lastOnePercentLowUpdateNanos = nowNanos;
+        boolean updateOnePercentLow = activePercentiles
+            && nowNanos - this.lastOnePercentLowUpdateNanos >= (long)onePercentLowIntervalMillis * NANOS_PER_MILLI;
+        boolean updateZeroOnePercentLow = activePercentiles
+            && nowNanos - this.lastZeroOnePercentLowUpdateNanos >= (long)zeroOnePercentLowIntervalMillis * NANOS_PER_MILLI;
+        if (updateOnePercentLow || updateZeroOnePercentLow) {
+            this.copyPercentileFramesToScratch();
+            int onePercentRank = this.percentileRank(0.01);
+            int zeroOnePercentRank = this.percentileRank(0.001);
+            if (updateOnePercentLow) {
+                this.displayedOnePercentLow = this.selectPercentile(onePercentRank);
+                ++this.displayRevision;
+                this.lastOnePercentLowUpdateNanos = nowNanos;
+            }
+            if (updateZeroOnePercentLow) {
+                this.displayedZeroOnePercentLow = updateOnePercentLow && onePercentRank == zeroOnePercentRank
+                    ? this.displayedOnePercentLow
+                    : this.selectPercentile(zeroOnePercentRank);
+                ++this.displayRevision;
+                this.lastZeroOnePercentLowUpdateNanos = nowNanos;
+            }
         }
-        if (activePercentiles && nowNanos - this.lastZeroOnePercentLowUpdateNanos >= (long)zeroOnePercentLowIntervalMillis * NANOS_PER_MILLI) {
-            cutoffNanos = nowNanos - historyWindowMillis * NANOS_PER_MILLI;
-            this.displayedZeroOnePercentLow = this.computePercentileLow(cutoffNanos, 0.001);
-            ++this.displayRevision;
-            this.lastZeroOnePercentLowUpdateNanos = nowNanos;
-        }
+    }
+
+    void pause() {
+        this.paused = true;
+        this.pollTotalNanos = 0L;
+        this.pollSampleCount = 0;
     }
 
     public boolean hasData() {
@@ -238,24 +273,68 @@ public class FpsTelemetryEngine {
         }
     }
 
-    private double computePercentileLow(long cutoffNanos, double percentile) {
-        int count = 0;
-        for (SamplePoint point : this.sampledFps) {
-            if (point.timestampNanos < cutoffNanos) continue;
-            ++count;
+    private void addPercentileFrame(long timestampNanos, double fps, long historyWindowMillis) {
+        long cutoffNanos = timestampNanos - Math.max(1L, historyWindowMillis) * NANOS_PER_MILLI;
+        while (this.percentileSize > 0 && this.percentileTimestamps[this.percentileStart] < cutoffNanos) {
+            this.percentileStart = (this.percentileStart + 1) % this.percentileTimestamps.length;
+            --this.percentileSize;
         }
-        if (count == 0) {
+        this.ensurePercentileCapacity(this.percentileSize + 1);
+        int end = (this.percentileStart + this.percentileSize) % this.percentileTimestamps.length;
+        this.percentileTimestamps[end] = timestampNanos;
+        this.percentileFrameFps[end] = fps;
+        ++this.percentileSize;
+    }
+
+    private void ensurePercentileCapacity(int requiredCapacity) {
+        if (requiredCapacity <= this.percentileTimestamps.length) {
+            return;
+        }
+        int newCapacity = Math.max(requiredCapacity, this.percentileTimestamps.length * 2);
+        long[] newTimestamps = new long[newCapacity];
+        double[] newFrameFps = new double[newCapacity];
+        int firstSegmentLength = Math.min(this.percentileSize, this.percentileTimestamps.length - this.percentileStart);
+        System.arraycopy(this.percentileTimestamps, this.percentileStart, newTimestamps, 0, firstSegmentLength);
+        System.arraycopy(this.percentileFrameFps, this.percentileStart, newFrameFps, 0, firstSegmentLength);
+        int secondSegmentLength = this.percentileSize - firstSegmentLength;
+        System.arraycopy(this.percentileTimestamps, 0, newTimestamps, firstSegmentLength, secondSegmentLength);
+        System.arraycopy(this.percentileFrameFps, 0, newFrameFps, firstSegmentLength, secondSegmentLength);
+        this.percentileTimestamps = newTimestamps;
+        this.percentileFrameFps = newFrameFps;
+        this.percentileStart = 0;
+    }
+
+    private void clearPercentileFramesIfDisabled() {
+        if (!this.computePercentiles && !this.externalPercentilesRequested) {
+            this.percentileStart = 0;
+            this.percentileSize = 0;
+        }
+    }
+
+    private void copyPercentileFramesToScratch() {
+        int count = this.percentileSize;
+        if (this.percentileScratch.length < count) {
+            this.percentileScratch = new double[Math.max(count, Math.max(INITIAL_PERCENTILE_CAPACITY, this.percentileScratch.length * 2))];
+        }
+        int firstSegmentLength = Math.min(count, this.percentileFrameFps.length - this.percentileStart);
+        System.arraycopy(this.percentileFrameFps, this.percentileStart, this.percentileScratch, 0, firstSegmentLength);
+        int secondSegmentLength = count - firstSegmentLength;
+        System.arraycopy(this.percentileFrameFps, 0, this.percentileScratch, firstSegmentLength, secondSegmentLength);
+    }
+
+    private int percentileRank(double percentile) {
+        if (this.percentileSize == 0) {
+            return 0;
+        }
+        int rank = (int)Math.ceil((double)this.percentileSize * percentile) - 1;
+        return Math.max(0, Math.min(rank, this.percentileSize - 1));
+    }
+
+    private double selectPercentile(int rank) {
+        if (this.percentileSize == 0) {
             return this.latestSampledFps;
         }
-        double[] fpsValues = new double[count];
-        int i = 0;
-        for (SamplePoint point : this.sampledFps) {
-            if (point.timestampNanos < cutoffNanos) continue;
-            fpsValues[i++] = point.fps;
-        }
-        int k = (int)Math.ceil((double)count * percentile) - 1;
-        k = Math.max(0, Math.min(k, count - 1));
-        return this.quickSelect(fpsValues, 0, count - 1, k);
+        return this.quickSelect(this.percentileScratch, 0, this.percentileSize - 1, rank);
     }
 
     public double getDynamicLowThreshold() {
