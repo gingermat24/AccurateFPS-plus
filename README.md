@@ -111,16 +111,15 @@ These describe implementation choices; no FPS or memory improvement benchmark is
 ## Dependencies & Compatibility
 
 | Mod | Status |
-| --- | --- |
-| [Fabric API](https://modrinth.com/mod/fabric-api) | Required for Fabric jars |
-| NeoForge | Required for NeoForge jars |
-| [Cloth Config](https://modrinth.com/mod/cloth-config) | Optional settings screen; install the variant for your loader |
-| [YetAnotherConfigLib (YACL)](https://modrinth.com/mod/yacl) | Optional settings screen; install the variant for your loader |
-| [Mod Menu](https://modrinth.com/mod/modmenu) | Recommended for Fabric; NeoForge uses its native Mods-list config button |
-| [Sodium](https://modrinth.com/mod/sodium) | Optional FPS-control integration where the target Sodium API is supported; renderer compatibility depends on the loader and Sodium version |
-| [Sodium FPS Cap Fix](https://modrinth.com/mod/sodiumfpscapfix) | Compatible; AccurateFPS+ leaves the vanilla FPS slider to this mod |
-| [Iris](https://modrinth.com/mod/iris) | Compatible |
-| [ImmediatelyFast](https://modrinth.com/mod/immediatelyfast) | Compatible |
+| ------------------------------------------------------------------------- | ------------------------------------------- |
+| [Fabric API](https://modrinth.com/mod/fabric-api) | 📦 **Required (FABRIC)** |
+| [Cloth Config](https://modrinth.com/mod/cloth-config) | ⚙️ **Optional** |
+| [YetAnotherConfigLib (YACL)](https://modrinth.com/mod/yacl) | ⚙️ **Optional** |
+| [Mod Menu](https://modrinth.com/mod/modmenu) | ⭐ **Recommended (FABRIC)** |
+| [Sodium](https://modrinth.com/mod/sodium) | ✅ **Compatible** |
+| [Sodium FPS Cap Fix](https://modrinth.com/mod/sodiumfpscapfix) | ✅ **Compatible** |
+| [Iris](https://modrinth.com/mod/iris) | ✅ **Compatible** |
+| [ImmediatelyFast](https://modrinth.com/mod/immediatelyfast) | ✅ **Compatible** |
 
 If neither Cloth Config nor YACL is installed, NeoForge still provides its built-in settings screen. On Fabric, settings can be loaded from `config/accuratefpsplus.json` without either library. The custom framerate limit is stored separately in `config/accuratefpsplus-fps.json`.
 
