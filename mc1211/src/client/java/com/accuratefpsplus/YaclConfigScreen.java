@@ -14,12 +14,9 @@ import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder;
 import java.awt.Color;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
-@Environment(EnvType.CLIENT)
 public class YaclConfigScreen {
     private static final int[] HISTORY_WINDOW_OPTIONS = new int[]{1, 3, 5, 10, 30, 60};
 

@@ -1,13 +1,10 @@
 package com.accuratefpsplus.mixin.sodium;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
-@Environment(EnvType.CLIENT)
 @Pseudo
 @Mixin(targets = "net.caffeinemc.mods.sodium.client.gui.SodiumConfigBuilder", remap = false)
 public class SodiumConfigBuilderMixin {

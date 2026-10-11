@@ -1,0 +1,113 @@
+plugins {
+    id "net.neoforged.moddev" version "2.0.148"
+}
+
+group = project.mod_group
+version = project.version
+
+repositories {
+    mavenCentral()
+    maven { url = "https://api.modrinth.com/maven" }
+}
+
+neoForge {
+    version = project.neoforge_version
+
+    runs {
+        client {
+            client()
+            gameDirectory = project.file("run")
+        }
+    }
+
+    mods {
+        accuratefpsplus {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir("../mc1211/src/client/java")
+            srcDir("../shared/src/client/java")
+            srcDir("../neoforge-common/src/main/java")
+            srcDir("../neoforge-common/src/client/java")
+            exclude("com/accuratefpsplus/AccurateFpsPlusFabricClient.java")
+            exclude("com/accuratefpsplus/modmenu/**")
+        }
+        resources {
+            srcDir("../mc1211/src/main/resources")
+            exclude("fabric.mod.json")
+            exclude("accuratefpsplus.accesswidener")
+        }
+    }
+    test {
+        java.srcDir("../shared/src/test/java")
+    }
+}
+
+dependencies {
+    compileOnly "maven.modrinth:cloth-config:${project.cloth_config_version}"
+    compileOnly "maven.modrinth:yacl:${project.yacl_version}"
+    compileOnly "maven.modrinth:sodium:${project.sodium_version}"
+
+    testImplementation platform("org.junit:junit-bom:${project.junit_version}")
+    testImplementation "org.junit.jupiter:junit-jupiter"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+
+    if (project.hasProperty("smokeCloth")) {
+        runtimeOnly "maven.modrinth:cloth-config:${project.cloth_config_version}"
+    }
+    if (project.hasProperty("smokeSodium")) {
+        runtimeOnly "maven.modrinth:sodium:${project.sodium_version}"
+    }
+    if (project.hasProperty("smokeYacl")) {
+        runtimeOnly "maven.modrinth:yacl:${project.yacl_version}"
+    }
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 21
+}
+
+processResources {
+    def metadata = [
+        mod_version: project.version,
+        minecraft_version: project.minecraft_version,
+        neoforge_version: project.neoforge_version,
+        cloth_config_min_version: project.cloth_config_min_version,
+        yacl_min_version: project.yacl_min_version,
+        sodium_min_version: project.sodium_min_version
+    ]
+    inputs.properties(metadata)
+    filesMatching("META-INF/neoforge.mods.toml") {
+        expand(metadata)
+    }
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
+    withSourcesJar()
+}
+
+base {
+    archivesName = "accuratefpsplus-${project.minecraft_version}"
+}
+
+tasks.named("jar") {
+    archiveClassifier = "neoforge"
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from("../LICENSE") {
+        rename { "${it}_accuratefpsplus" }
+    }
+}
+
+tasks.named("sourcesJar") {
+    archiveClassifier = "neoforge-sources"
+}

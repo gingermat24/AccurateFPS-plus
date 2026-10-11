@@ -5,12 +5,9 @@ import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.impl.builders.SubCategoryBuilder;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
-@Environment(EnvType.CLIENT)
 @SuppressWarnings("rawtypes")
 public class ConfigScreen {
     private static final int[] HISTORY_WINDOW_OPTIONS = new int[]{1, 3, 5, 10, 30, 60};
@@ -367,19 +364,16 @@ public class ConfigScreen {
     }
 
     @FunctionalInterface
-    @Environment(value=EnvType.CLIENT)
     private static interface BoolSetter {
         public void accept(boolean var1);
     }
 
     @FunctionalInterface
-    @Environment(value=EnvType.CLIENT)
     private static interface IntSetter {
         public void accept(int var1);
     }
 
     @FunctionalInterface
-    @Environment(value=EnvType.CLIENT)
     private static interface StrSetter {
         public void accept(String var1);
     }

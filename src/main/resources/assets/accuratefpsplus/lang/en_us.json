@@ -1,6 +1,7 @@
 {
   "title.accuratefpsplus.config": "AccurateFPS+ Configuration",
   "category.accuratefpsplus.title": "AccurateFPS+",
+  "key.category.accuratefpsplus.general": "AccurateFPS+",
   "key.accuratefpsplus.toggleHUD": "Toggle HUD",
   "key.accuratefpsplus.cyclePreset": "Cycle HUD Preset",
 
@@ -103,6 +104,8 @@
   "value.accuratefpsplus.slot.fourth": "4th",
   "value.accuratefpsplus.slot.fifth": "5th",
   "value.accuratefpsplus.slot.sixth": "6th",
+  "value.accuratefpsplus.enabled": "Enabled",
+  "value.accuratefpsplus.disabled": "Disabled",
   "value.accuratefpsplus.anchor.custom": "Custom",
   "value.accuratefpsplus.anchor.topLeft": "Top Left",
   "value.accuratefpsplus.anchor.topRight": "Top Right",
@@ -124,10 +127,15 @@
 
   "value.accuratefpsplus.thresholdMode.automatic": "Automatic",
   "value.accuratefpsplus.thresholdMode.manual": "Manual",
+  "value.accuratefpsplus.calculationMode.averaged": "Averaged",
+  "value.accuratefpsplus.calculationMode.realtime": "Real-Time",
+  "value.accuratefpsplus.calculationMode.ema": "EMA",
+  "value.accuratefpsplus.historyWindow": "%s seconds",
 
   "tooltip.accuratefpsplus.autoColor": "Color using dynamic gradient",
   "option.accuratefpsplus.detectDisplayHz": "Match Display Refresh Rate",
   "tooltip.accuratefpsplus.detectDisplayHz": "Automatically sets manual thresholds based on your monitor's refresh rate",
   "message.accuratefpsplus.detectedHz": "Matched display refresh rate: %d Hz",
-  "error.accuratefpsplus.invalidColor": "Invalid color"
+  "error.accuratefpsplus.invalidColor": "Invalid color",
+  "error.accuratefpsplus.invalidValue": "Please enter a valid value."
 }

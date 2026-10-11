@@ -50,6 +50,7 @@ dependencies {
 }
 
 sourceSets.client.java.srcDir("../shared/src/client/java")
+sourceSets.client.java.srcDir("../fabric-platform/src/client/java")
 sourceSets.test.java.srcDirs("../shared/src/client/java", "../shared/src/test/java")
 
 dependencies {

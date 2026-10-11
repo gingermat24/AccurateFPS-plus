@@ -1,6 +1,6 @@
 package com.accuratefpsplus.mixin.sodium;
 
-import net.fabricmc.loader.api.FabricLoader;
+import com.accuratefpsplus.AccurateFpsPlusPlatform;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -20,7 +20,7 @@ public final class SodiumMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        return FabricLoader.getInstance().isModLoaded("sodium");
+        return AccurateFpsPlusPlatform.isModLoaded("sodium");
     }
 
     @Override

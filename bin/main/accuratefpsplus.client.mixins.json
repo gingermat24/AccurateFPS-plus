@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "com.accuratefpsplus.mixin.client",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "GameOptionsPreciseFpsMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

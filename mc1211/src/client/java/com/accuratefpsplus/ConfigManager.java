@@ -9,21 +9,18 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Environment(EnvType.CLIENT)
 @SuppressWarnings("unused")
 public class ConfigManager {
     private static final Logger LOGGER = LoggerFactory.getLogger("AccurateFPS+");
     private static Config config;
-    private static final Path configPath;
+    private static Path configPath;
     private static final int CURRENT_CONFIG_VERSION = 4;
 
-    protected static void loadConfig() {
+    protected static void loadConfig(Path configDirectory) {
+        configPath = configDirectory.resolve("accuratefpsplus.json");
         Gson gson = new Gson();
         if (Files.exists(configPath)) {
             try (BufferedReader reader = Files.newBufferedReader(configPath, StandardCharsets.UTF_8)) {
@@ -477,11 +474,6 @@ public class ConfigManager {
         return value == null ? "" : value;
     }
 
-    static {
-        configPath = FabricLoader.getInstance().getConfigDir().resolve("accuratefpsplus.json");
-    }
-
-    @Environment(value=EnvType.CLIENT)
     private static class Config {
         int configVersion;
         boolean toggleHUD;
