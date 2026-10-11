@@ -41,8 +41,6 @@ All four current release jars provide the same player-facing HUD, metrics, setti
 | `1.0-r2 Refabricated` | 1.21.11 | Fabric |
 | `1.0-r1` | 1.21.1, 1.21.11 | Fabric, Forge, Quilt |
 
-The build matrix uses Java 21, Fabric API **0.116.17+1.21.1** / **0.141.6+1.21.11**, and NeoForge **21.1.259** / **21.11.45** for Minecraft **1.21.1** / **1.21.11**, respectively. Optional library variants are loader- and Minecraft-specific.
-
 ---
 
 ## Configuration
