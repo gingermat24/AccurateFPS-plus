@@ -57,11 +57,11 @@ dependencies {
     testImplementation "org.junit.jupiter:junit-jupiter"
     testRuntimeOnly "org.junit.platform:junit-platform-launcher"
 
-    if (project.hasProperty("smokeCloth")) {
-        runtimeOnly "maven.modrinth:cloth-config:${project.cloth_config_version}"
-    }
     if (project.hasProperty("smokeSodium")) {
         runtimeOnly "maven.modrinth:sodium:${project.sodium_version}"
+    }
+    if (project.hasProperty("smokeCloth")) {
+        runtimeOnly "maven.modrinth:cloth-config:${project.cloth_config_version}"
     }
     if (project.hasProperty("smokeYacl")) {
         runtimeOnly "maven.modrinth:yacl:${project.yacl_version}"

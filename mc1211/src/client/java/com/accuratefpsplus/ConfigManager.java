@@ -17,7 +17,7 @@ public class ConfigManager {
     private static final Logger LOGGER = LoggerFactory.getLogger("AccurateFPS+");
     private static Config config;
     private static Path configPath;
-    private static final int CURRENT_CONFIG_VERSION = 4;
+    private static final int CURRENT_CONFIG_VERSION = 8;
 
     protected static void loadConfig(Path configDirectory) {
         configPath = configDirectory.resolve("accuratefpsplus.json");
@@ -53,16 +53,19 @@ public class ConfigManager {
     }
 
     private static void restoreDefaultConfig(boolean save) {
+        AccurateFpsPlusClient.configScreenPreference = ConfigScreenRouter.defaultPreference();
         config = new Config();
         config.configVersion = CURRENT_CONFIG_VERSION;
         ConfigManager.config.toggleHUD = AccurateFpsPlusClient.toggleHUD;
         ConfigManager.config.hideWithF3 = AccurateFpsPlusClient.hideWithF3;
+        ConfigManager.config.hudScalePercent = AccurateFpsPlusClient.hudScalePercent;
         ConfigManager.config.xPos = AccurateFpsPlusClient.xPos;
         ConfigManager.config.yPos = AccurateFpsPlusClient.yPos;
         ConfigManager.config.shadow = AccurateFpsPlusClient.shadow;
         ConfigManager.config.pollingRate = AccurateFpsPlusClient.pollingRate;
         ConfigManager.config.calculationMode = AccurateFpsPlusClient.calculationMode;
         ConfigManager.config.historyWindowSeconds = AccurateFpsPlusClient.historyWindowSeconds;
+        ConfigManager.config.configScreenPreference = AccurateFpsPlusClient.configScreenPreference;
         ConfigManager.config.anchorCorner = AccurateFpsPlusClient.anchorCorner;
         ConfigManager.config.darkModeOverlay = AccurateFpsPlusClient.darkModeOverlay;
         ConfigManager.config.overlayColor = AccurateFpsPlusClient.overlayColor;
@@ -138,12 +141,14 @@ public class ConfigManager {
     private static void applyConfig() {
         AccurateFpsPlusClient.toggleHUD = ConfigManager.config.toggleHUD;
         AccurateFpsPlusClient.hideWithF3 = ConfigManager.config.hideWithF3;
+        AccurateFpsPlusClient.hudScalePercent = ConfigManager.config.hudScalePercent;
         AccurateFpsPlusClient.xPos = ConfigManager.config.xPos;
         AccurateFpsPlusClient.yPos = ConfigManager.config.yPos;
         AccurateFpsPlusClient.shadow = ConfigManager.config.shadow;
         AccurateFpsPlusClient.pollingRate = Math.max(1, ConfigManager.config.pollingRate);
         AccurateFpsPlusClient.calculationMode = ConfigManager.config.calculationMode;
         AccurateFpsPlusClient.historyWindowSeconds = Math.max(1, ConfigManager.config.historyWindowSeconds);
+        AccurateFpsPlusClient.configScreenPreference = Math.max(0, Math.min(2, ConfigManager.config.configScreenPreference));
         AccurateFpsPlusClient.anchorCorner = ConfigManager.config.anchorCorner;
         AccurateFpsPlusClient.darkModeOverlay = ConfigManager.config.darkModeOverlay;
         AccurateFpsPlusClient.overlayColor = ConfigManager.config.overlayColor;
@@ -314,6 +319,23 @@ public class ConfigManager {
             }
             migrated = true;
         }
+        if (ConfigManager.config.configVersion < 5) {
+            AccurateFpsPlusClient.configScreenPreference = 0;
+            migrated = true;
+        }
+        if (ConfigManager.config.configVersion < 6) {
+            migrated = true;
+        }
+        if (ConfigManager.config.configVersion < 7) {
+            AccurateFpsPlusClient.hudScalePercent = 100;
+            migrated = true;
+        }
+        if (ConfigManager.config.configVersion < 8) {
+            if (AccurateFpsPlusClient.configScreenPreference == 0) {
+                AccurateFpsPlusClient.configScreenPreference = ConfigScreenRouter.defaultPreference();
+            }
+            migrated = true;
+        }
         if (migrated) {
             ConfigManager.config.configVersion = CURRENT_CONFIG_VERSION;
             ConfigManager.saveConfig();
@@ -326,12 +348,14 @@ public class ConfigManager {
         currentConfig.configVersion = CURRENT_CONFIG_VERSION;
         currentConfig.toggleHUD = AccurateFpsPlusClient.toggleHUD;
         currentConfig.hideWithF3 = AccurateFpsPlusClient.hideWithF3;
+        currentConfig.hudScalePercent = AccurateFpsPlusClient.hudScalePercent;
         currentConfig.xPos = AccurateFpsPlusClient.xPos;
         currentConfig.yPos = AccurateFpsPlusClient.yPos;
         currentConfig.shadow = AccurateFpsPlusClient.shadow;
         currentConfig.pollingRate = AccurateFpsPlusClient.pollingRate;
         currentConfig.calculationMode = AccurateFpsPlusClient.calculationMode;
         currentConfig.historyWindowSeconds = AccurateFpsPlusClient.historyWindowSeconds;
+        currentConfig.configScreenPreference = AccurateFpsPlusClient.configScreenPreference;
         currentConfig.anchorCorner = AccurateFpsPlusClient.anchorCorner;
         currentConfig.darkModeOverlay = AccurateFpsPlusClient.darkModeOverlay;
         currentConfig.overlayColor = AccurateFpsPlusClient.overlayColor;
@@ -412,6 +436,7 @@ public class ConfigManager {
 
     private static void normalizeRuntimeConfig() {
         AccurateFpsPlusClient.calculationMode = Math.max(0, Math.min(2, AccurateFpsPlusClient.calculationMode));
+        AccurateFpsPlusClient.hudScalePercent = Math.max(1, Math.min(200, AccurateFpsPlusClient.hudScalePercent));
         AccurateFpsPlusClient.anchorCorner = Math.max(0, Math.min(4, AccurateFpsPlusClient.anchorCorner));
         AccurateFpsPlusClient.overlayColor &= 0xFFFFFF;
         AccurateFpsPlusClient.overlayTransparency = Math.max(0, Math.min(100, AccurateFpsPlusClient.overlayTransparency));
@@ -478,12 +503,14 @@ public class ConfigManager {
         int configVersion;
         boolean toggleHUD;
         boolean hideWithF3;
+        int hudScalePercent;
         int xPos;
         int yPos;
         boolean shadow;
         int pollingRate;
         int calculationMode;
         int historyWindowSeconds;
+        int configScreenPreference;
         int anchorCorner;
         boolean darkModeOverlay;
         int overlayColor;

@@ -1,9 +1,8 @@
 package com.accuratefpsplus.neoforge;
 
 import com.accuratefpsplus.AccurateFpsPlusClient;
-import com.accuratefpsplus.ConfigScreen;
+import com.accuratefpsplus.ConfigScreenRouter;
 import com.accuratefpsplus.NativeConfigScreen;
-import com.accuratefpsplus.YaclConfigScreen;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -11,7 +10,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
@@ -35,13 +33,21 @@ final class NeoForgeClientEvents {
         InputConstants.UNKNOWN.getValue(),
         KEY_CATEGORY
     );
+    private static final KeyMapping OPEN_CONFIG = new KeyMapping(
+        "key.accuratefpsplus.openConfig",
+        InputConstants.Type.KEYSYM,
+        InputConstants.UNKNOWN.getValue(),
+        KEY_CATEGORY
+    );
 
     private NeoForgeClientEvents() {
     }
 
     static void register(IEventBus modEventBus, ModContainer modContainer) {
         AccurateFpsPlusClient.initialize(FMLPaths.CONFIGDIR.get());
-        AccurateFpsPlusClient.setKeyMappings(TOGGLE_HUD, CYCLE_PRESET);
+        AccurateFpsPlusClient.setKeyMappings(
+            TOGGLE_HUD, CYCLE_PRESET, OPEN_CONFIG
+        );
 
         modContainer.registerExtensionPoint(IConfigScreenFactory.class, NeoForgeClientEvents::createConfigScreen);
         modEventBus.addListener(NeoForgeClientEvents::registerKeyMappings);
@@ -53,6 +59,7 @@ final class NeoForgeClientEvents {
         event.registerCategory(KEY_CATEGORY);
         event.register(TOGGLE_HUD);
         event.register(CYCLE_PRESET);
+        event.register(OPEN_CONFIG);
     }
 
     private static void registerGuiLayers(RegisterGuiLayersEvent event) {
@@ -67,24 +74,7 @@ final class NeoForgeClientEvents {
     }
 
     private static Screen createConfigScreen(ModContainer container, Screen parent) {
-        if (ModList.get().isLoaded("cloth_config")) {
-            return ClothConfigScreenHelper.open(parent);
-        }
-        if (ModList.get().isLoaded("yet_another_config_lib_v3")) {
-            return YaclConfigScreenHelper.open(parent);
-        }
-        return NativeConfigScreen.create(parent);
-    }
-
-    private static final class ClothConfigScreenHelper {
-        private static Screen open(Screen parent) {
-            return ConfigScreen.getConfigScreen(parent);
-        }
-    }
-
-    private static final class YaclConfigScreenHelper {
-        private static Screen open(Screen parent) {
-            return YaclConfigScreen.getConfigScreen(parent);
-        }
+        Screen optionalScreen = ConfigScreenRouter.createPreferred(parent);
+        return optionalScreen != null ? optionalScreen : NativeConfigScreen.create(parent);
     }
 }

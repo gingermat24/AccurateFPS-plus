@@ -32,24 +32,23 @@ public class AccurateFpsPlusClient {
     private static int cachedScreenHeight;
     private static KeyMapping toggleHudKey;
     private static KeyMapping cyclePresetKey;
+    private static KeyMapping openConfigKey;
+    private static final String KEY_CATEGORY = "category.accuratefpsplus.title";
     protected static boolean toggleHUD;
     protected static boolean hideWithF3;
+    protected static int hudScalePercent;
     protected static int xPos;
     protected static int yPos;
     protected static boolean shadow;
     protected static int pollingRate;
     protected static int calculationMode;
     protected static int historyWindowSeconds;
+    protected static int configScreenPreference;
     protected static int anchorCorner;
     protected static boolean darkModeOverlay;
     protected static int overlayColor;
     protected static int overlayTransparency;
     private static int cachedOverlayColorWithAlpha;
-    private static final java.lang.reflect.Method POSE_GETTER;
-    private static final java.lang.reflect.Method POSE_PUSH;
-    private static final java.lang.reflect.Method POSE_POP;
-    private static final java.lang.reflect.Method POSE_SCALE;
-    private static final boolean POSE_SCALE_IS_3D;
     protected static int currentPreset;
     protected static boolean showFps;
     protected static int fpsPosition;
@@ -121,9 +120,10 @@ public class AccurateFpsPlusClient {
         AccurateFpsPlusClient.updateCachedOverlayColor();
     }
 
-    public static void setKeyMappings(KeyMapping toggleKey, KeyMapping presetCycleKey) {
+    public static void setKeyMappings(KeyMapping toggleKey, KeyMapping presetCycleKey, KeyMapping configKey) {
         toggleHudKey = toggleKey;
         cyclePresetKey = presetCycleKey;
+        openConfigKey = configKey;
     }
 
     public static KeyMapping getToggleHudKeyMapping() {
@@ -146,11 +146,25 @@ public class AccurateFpsPlusClient {
                 ConfigManager.saveConfig();
             }
         }
+        while (openConfigKey != null && openConfigKey.consumeClick()) {
+            if (client.screen == null) {
+                client.setScreen(ConfigScreenRouter.create(null));
+            }
+        }
+        if (isTelemetryInactive(client)) {
+            telemetryEngine.pause();
+        }
+    }
+
+    private static boolean isTelemetryInactive(Minecraft client) {
+        return !toggleHUD || client.screen != null
+            || (hideWithF3 && client.getDebugOverlay() != null && client.getDebugOverlay().showDebugScreen());
     }
 
     public static void renderHud(GuiGraphics context) {
         Minecraft mc = Minecraft.getInstance();
-        if (!toggleHUD || mc.screen != null || (hideWithF3 && mc.getDebugOverlay() != null && mc.getDebugOverlay().showDebugScreen())) {
+        if (isTelemetryInactive(mc)) {
+            telemetryEngine.pause();
             return;
         }
         telemetryEngine.onFrame(pollingRate, mainUpdateInterval, avrUpdateInterval, maxUpdateInterval, minUpdateInterval, onePercentLowUpdateInterval, zeroOnePercentLowUpdateInterval, (long)historyWindowSeconds * 1000L);
@@ -164,13 +178,17 @@ public class AccurateFpsPlusClient {
             return;
         }
 
+        float hudScale = Math.max(0.01f, Math.min(2.0f, hudScalePercent / 100.0f));
         float lowScale = 0.75f;
         int mainLineHeight = hasMainMetrics ? hud.fontHeight : 0;
-        int lowLineHeight = hasLowMetrics ? (int) Math.ceil(hud.fontHeight * lowScale) : 0;
+        int lowLineHeight = hasLowMetrics ? (int) Math.ceil(hud.fontHeight * lowScale * hudScale) : 0;
         int lineSpacing = (hasMainMetrics && hasLowMetrics) ? 2 : 0;
-        int totalHeight = mainLineHeight + lineSpacing + lowLineHeight;
-        int lowVisualWidth = hasLowMetrics ? (int) Math.ceil(hud.lowTextWidth * lowScale) : 0;
-        int maxWidth = Math.max(hasMainMetrics ? hud.mainTextWidth : 0, lowVisualWidth);
+        int mainVisualHeight = hasMainMetrics ? (int) Math.ceil(mainLineHeight * hudScale) : 0;
+        int visualSpacing = (hasMainMetrics && hasLowMetrics) ? (int) Math.ceil(lineSpacing * hudScale) : 0;
+        int totalHeight = mainVisualHeight + visualSpacing + lowLineHeight;
+        int mainVisualWidth = hasMainMetrics ? (int) Math.ceil(hud.mainTextWidth * hudScale) : 0;
+        int lowVisualWidth = hasLowMetrics ? (int) Math.ceil(hud.lowTextWidth * lowScale * hudScale) : 0;
+        int maxWidth = Math.max(mainVisualWidth, lowVisualWidth);
 
         if (positionDirty || anchorCorner != 0) {
             int screenW = mc.getWindow().getGuiScaledWidth();
@@ -184,16 +202,19 @@ public class AccurateFpsPlusClient {
         }
 
         int mainY = cachedRenderY;
-        int lowY = hasMainMetrics ? (cachedRenderY + mainLineHeight + lineSpacing) : cachedRenderY;
+        int lowY = hasMainMetrics ? (cachedRenderY + mainVisualHeight + visualSpacing) : cachedRenderY;
 
         if (darkModeOverlay) {
-            context.fill(cachedRenderX - 3, cachedRenderY - 3, cachedRenderX + maxWidth + 3, cachedRenderY + totalHeight + 3, cachedOverlayColorWithAlpha);
+            int overlayPadding = Math.max(1, (int)Math.ceil(3 * hudScale));
+            context.fill(cachedRenderX - overlayPadding, cachedRenderY - overlayPadding,
+                cachedRenderX + maxWidth + overlayPadding, cachedRenderY + totalHeight + overlayPadding,
+                cachedOverlayColorWithAlpha);
         }
         if (hasMainMetrics) {
-            context.drawString(mc.font, hud.mainOrderedText, cachedRenderX, mainY, -1, shadow);
+            drawScaledText(context, mc.font, hud.mainOrderedText, cachedRenderX, mainY, hudScale, -1, shadow);
         }
         if (hasLowMetrics) {
-            drawScaledText(context, mc.font, hud.lowOrderedText, cachedRenderX, lowY, lowScale, -1, shadow);
+            drawScaledText(context, mc.font, hud.lowOrderedText, cachedRenderX, lowY, lowScale * hudScale, -1, shadow);
         }
     }
 
@@ -448,44 +469,7 @@ public class AccurateFpsPlusClient {
     }
 
     public static KeyMapping createKeyMapping(String translationKey) {
-        try {
-            Class<?> categoryClass = null;
-            for (Class<?> nested : KeyMapping.class.getDeclaredClasses()) {
-                if ("Category".equals(nested.getSimpleName())) {
-                    categoryClass = nested;
-                    break;
-                }
-            }
-            if (categoryClass != null) {
-                Object category = null;
-                try {
-                    category = categoryClass.getField("MISC").get(null);
-                } catch (Throwable ignored) {
-                }
-                if (category != null) {
-                    java.lang.reflect.Constructor<KeyMapping> ctor = KeyMapping.class.getConstructor(
-                        String.class,
-                        InputConstants.Type.class,
-                        int.class,
-                        categoryClass
-                    );
-                    return ctor.newInstance(translationKey, InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), category);
-                }
-            }
-        } catch (Throwable ignored) {
-        }
-
-        try {
-            java.lang.reflect.Constructor<KeyMapping> ctor = KeyMapping.class.getConstructor(
-                String.class,
-                InputConstants.Type.class,
-                int.class,
-                String.class
-            );
-            return ctor.newInstance(translationKey, InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), "category.accuratefpsplus.title");
-        } catch (Throwable t) {
-            return null;
-        }
+        return new KeyMapping(translationKey, InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), KEY_CATEGORY);
     }
 
     public static int detectDisplayRefreshRate() {
@@ -531,6 +515,7 @@ public class AccurateFpsPlusClient {
         cachedScreenHeight = -1;
         toggleHUD = true;
         hideWithF3 = true;
+        hudScalePercent = 100;
         xPos = 5;
         yPos = 5;
         shadow = true;
@@ -606,32 +591,6 @@ public class AccurateFpsPlusClient {
         manualThresholdMed = 60;
         manualThresholdHigh = 120;
 
-        java.lang.reflect.Method getter = null;
-        java.lang.reflect.Method push = null;
-        java.lang.reflect.Method pop = null;
-        java.lang.reflect.Method scale = null;
-        boolean scale3d = false;
-        try {
-            getter = net.minecraft.client.gui.GuiGraphics.class.getMethod("pose");
-            Class<?> poseClass = getter.getReturnType();
-            try {
-                push = poseClass.getMethod("pushMatrix");
-                pop = poseClass.getMethod("popMatrix");
-                scale = poseClass.getMethod("scale", float.class, float.class);
-                scale3d = false;
-            } catch (NoSuchMethodException e) {
-                push = poseClass.getMethod("pushPose");
-                pop = poseClass.getMethod("popPose");
-                scale = poseClass.getMethod("scale", float.class, float.class, float.class);
-                scale3d = true;
-            }
-        } catch (Throwable ignored) {
-        }
-        POSE_GETTER = getter;
-        POSE_PUSH = push;
-        POSE_POP = pop;
-        POSE_SCALE = scale;
-        POSE_SCALE_IS_3D = scale3d;
     }
 
     private static void drawScaledText(net.minecraft.client.gui.GuiGraphics context, net.minecraft.client.gui.Font font, FormattedCharSequence text, float x, float y, float scale, int color, boolean shadow) {
@@ -639,32 +598,14 @@ public class AccurateFpsPlusClient {
             context.drawString(font, text, (int) x, (int) y, color, shadow);
             return;
         }
-        Object pose = null;
+        var pose = context.pose();
+        pose.pushPose();
         try {
-            if (POSE_GETTER != null) {
-                pose = POSE_GETTER.invoke(context);
-            }
-        } catch (Throwable ignored) {
-        }
-        if (pose == null || POSE_PUSH == null || POSE_POP == null || POSE_SCALE == null) {
-            context.drawString(font, text, (int) x, (int) y, color, shadow);
-            return;
-        }
-        try {
-            POSE_PUSH.invoke(pose);
-            try {
-                if (POSE_SCALE_IS_3D) {
-                    POSE_SCALE.invoke(pose, scale, scale, 1.0f);
-                } else {
-                    POSE_SCALE.invoke(pose, scale, scale);
-                }
-                float invScale = 1.0f / scale;
-                context.drawString(font, text, Math.round(x * invScale), Math.round(y * invScale), color, shadow);
-            } finally {
-                POSE_POP.invoke(pose);
-            }
-        } catch (Throwable t) {
-            context.drawString(font, text, (int) x, (int) y, color, shadow);
+            pose.scale(scale, scale, 1.0f);
+            float invScale = 1.0f / scale;
+            context.drawString(font, text, Math.round(x * invScale), Math.round(y * invScale), color, shadow);
+        } finally {
+            pose.popPose();
         }
     }
 

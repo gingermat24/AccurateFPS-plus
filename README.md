@@ -7,7 +7,7 @@ A lightweight, client-side **FPS HUD** mod with an **extended framerate slider**
 ## Highlights
 
 * **7 Performance Metrics** - Track **Live FPS, Frametime, AVG, MAX, MIN, 1% Low, and 0.1% Low** to see current performance and framerate stability in detail.
-* **1% & 0.1% Lows** - Monitor lower-end framerate to identify performance drops that average FPS can hide. Low percentiles use nearest-rank selection over sampled FPS values in the configured history window.
+* **1% & 0.1% Lows** - Monitor lower-end framerate to identify performance drops that average FPS can hide. Low percentiles use nearest-rank selection over valid per-frame FPS values in the configured history window.
 * **Extended FPS Slider** - When no recognized conflicting FPS-cap or textbox mod is installed, AccurateFPS+ replaces the vanilla framerate limit slider with a precise **1–1000 FPS** range and 1 FPS increments. The selected limit persists in its own config file.
 * **Flexible FPS Calculation** - Choose between **Real-Time**, **Averaged**, or **EMA** (exponential moving average) calculation modes.
 * **FPS History & Statistics** - Configure the history window used for AVG and low-percentile calculations from **1s to 60s**. MAX and MIN are also calculated from retained samples.
@@ -15,13 +15,14 @@ A lightweight, client-side **FPS HUD** mod with an **extended framerate slider**
 * **Smooth Dynamic Gradient** - Blend between customizable **Low, Medium, and High** colors so FPS values transition smoothly rather than switching between fixed colors.
 * **Adaptive or Manual Coloring** - Let **Automatic** mode adapt color thresholds to gameplay performance using EMA baseline smoothing, or set exact thresholds in **Manual** mode.
 * **Deep HUD Customization** - Customize metric visibility, order, position, decimal precision, prefixes, suffixes, colors, text shadow, and background overlay.
+* **HUD Size** - Scale the complete HUD from **1% to 200%**; default is **100%**.
 * **Presets** - Quickly switch between **Minimal, Competitive, Detailed, and Custom** HUD layouts.
 * **Preset Cycle Keybind** - Cycle through Minimal, Competitive, and Detailed presets in-game; the keybind starts unbound to avoid conflicts with other mods.
-* **In-Game Settings** - NeoForge includes a built-in settings screen; Cloth Config or YetAnotherConfigLib (YACL) provides an optional alternate screen on supported loaders. On Fabric, install either library to configure in-game.
+* **In-Game Settings** - Cloth Config and YACL provide optional settings screens. On Fabric, the unbound-by-default **Open Configuration** keybind is available when at least one is installed; the Mod Menu entry is also available when Mod Menu is installed. NeoForge always has a Mods-list entry and native fallback screen; when Cloth Config or YACL is installed, it uses the selected optional screen instead. If both are installed, choose between them in General settings; Cloth Config is the default.
 * **Client API** - Companion mods can read current telemetry through `com.accuratefpsplus.api.AccurateFpsApi`.
 * **Conflict Avoidance** - The framerate slider integration is skipped when specific known FPS-cap or textbox mod IDs are present; this avoids replacing those controls but does not guarantee compatibility with every FPS mod.
 
-All four current release jars provide the same player-facing HUD, metrics, settings, presets, keybinds, FPS slider, and optional Sodium integration. Loader entrypoints, game APIs, and dependency builds differ where required for Fabric, NeoForge, or the Minecraft version.
+All four target builds provide the same player-facing HUD, metrics, settings, presets, keybinds, FPS slider, and optional Sodium integration. Loader entrypoints, game APIs, and dependency builds differ where required for Fabric, NeoForge, or the Minecraft version.
 
   ![preview of the All Metrics preset](https://cdn.modrinth.com/data/cached_images/14a662614a47160304e1bd56a96e22dd3d15b1ec.gif)
   > "_All Metrics_" preset + _Fixed Auto-Coloring_ (before dynamic gradient) - **v1.0-r1**
@@ -35,7 +36,8 @@ All four current release jars provide the same player-facing HUD, metrics, setti
 
 | Release | Minecraft | Loader |
 | :--- | :---: | :---: |
-| **`1.2-r2` (Latest)** | **1.21.1, 1.21.11** | Fabric, NeoForge |
+| `1.3-r1` **(Latest)** | **1.21.1, 1.21.11** | Fabric, NeoForge |
+| `1.2-r2` | 1.21.1, 1.21.11 | Fabric, NeoForge |
 | `1.2-r1` | 1.21.1, 1.21.11 | Fabric |
 | `1.1-r1` | 1.21.1, 1.21.11 | Fabric |
 | `1.0-r2 Refabricated` | 1.21.11 | Fabric |
@@ -46,7 +48,7 @@ All four current release jars provide the same player-facing HUD, metrics, setti
 ## Configuration
 
 <details>
-<summary>Settings are organized into 4 categories. Save changes in the configuration screen; a game restart is not required:</summary>
+<summary>Settings are grouped into up to 4 contextual categories; controls that do not apply are hidden. Engine tuning settings remain available even when their related metrics are disabled. Save changes in the configuration screen; a game restart is not required:</summary>
 
 ### 1. General
 - **Enable HUD** - Toggle HUD visibility.
@@ -56,6 +58,8 @@ All four current release jars provide the same player-facing HUD, metrics, setti
 - **HUD Anchor** - Top-Left, Top-Right, Bottom-Left, Bottom-Right, or Custom.
 - **X & Y Offsets** - Fine-tune the HUD position.
 - **Text Shadow** - Toggle text drop shadow.
+- **HUD Size** - Scale all HUD text and the background overlay from 1% to 200% (100% by default).
+- **Settings Screen** - Cloth Config and YACL are optional, independent settings-screen libraries. If both are installed, choose between them in General settings; Cloth Config is selected by default. If only one is installed, AccurateFPS+ uses it without showing a redundant selector. With neither installed, Fabric has no settings entry or configuration keybind; NeoForge retains its Mods-list entry, native configuration screen, and configuration keybind.
 - **Background Overlay** - Optional background box with customizable color and transparency.
 
 ### 2. Metrics
@@ -65,8 +69,10 @@ Organized into 7 metric groups:
 - **Average (AVG)** - Average FPS over the retained history window.
 - **Maximum (MAX)** - Maximum FPS in the retained history window.
 - **Minimum (MIN)** - Minimum FPS in the retained history window.
-- **1% Low** - Nearest-rank low-percentile FPS over the retained samples.
-- **0.1% Low** - Nearest-rank low-percentile FPS over the retained samples.
+- **1% Low** - Nearest-rank low-percentile FPS over valid active render-frame samples.
+- **0.1% Low** - Nearest-rank low-percentile FPS over valid active render-frame samples.
+
+Percentiles use one observation per rendered frame, independently of the Engine polling interval. Each low reports the nearest-rank percentile FPS sample; it is not the average FPS of the slowest 1% or 0.1% of frames. Inactive periods (HUD disabled, a screen open, or F3 hiding the HUD) pause sampling. Active frame gaps of 1 second or longer are treated as interruptions and discarded. The two low-percentile values can still match when nearest-rank selects the same frame rank or when the corresponding frame rates are equal.
 
 Each metric can be configured with:
 - Visibility toggle
@@ -87,7 +93,7 @@ Each metric can be configured with:
 - **Calculation Mode** - Real-Time, Averaged, or EMA.
 - **History Window** - 1s, 3s, 5s, 10s, 30s, or 60s for retained samples.
 - **Polling Interval** - Set how often frame data is sampled.
-- **Refresh Intervals** - FPS and Frametime update together; AVG, MAX, MIN, 1% Low, and 0.1% Low have independent refresh intervals.
+- **Refresh Intervals** - FPS and Frametime update together; AVG, MAX, MIN, 1% Low, and 0.1% Low have independent refresh intervals. All intervals remain configurable even when their metrics are disabled.
 
 </details>
 
@@ -97,14 +103,16 @@ Use **Cycle HUD Preset** in the Controls menu to rotate **Minimal → Competitiv
 
 ## Performance
 
-- **Bounded telemetry history** - Retains frame samples within the configured history and required statistic refresh windows.
+- **Time-windowed telemetry history** - Retains frame samples within the configured history and required statistic refresh windows.
+- **Frame-based low percentiles** - Uses valid render-frame intervals rather than polling-window samples, so short frame drops are represented in the low metrics.
+- **Reusable percentile workspace** - Stores frame history in a time-windowed primitive ring and reuses its Quickselect workspace.
 - **Cached HUD text** - Text composition is skipped when telemetry values and configuration have not changed.
 - **Cached overlay color and dimensions** - Reuses calculated overlay color and render dimensions.
 - **Low-percentile selection** - Uses Quickselect with a median-of-three pivot instead of fully sorting the sample window.
 - **Shared range-statistics pass** - Calculates due AVG, MAX, and MIN values together when any of their refresh deadlines is reached.
 - **Automatic config migration** - Upgrades supported older settings formats when loading the configuration.
 
-These describe implementation choices; no FPS or memory improvement benchmark is claimed.
+These describe implementation choices. Synthetic engine profiling is not an in-game FPS benchmark and does not claim a gameplay performance gain.
 
 ---
 
@@ -115,13 +123,13 @@ These describe implementation choices; no FPS or memory improvement benchmark is
 | [Fabric API](https://modrinth.com/mod/fabric-api) | 📦 **Required (FABRIC)** |
 | [Cloth Config](https://modrinth.com/mod/cloth-config) | ⚙️ **Optional** |
 | [YetAnotherConfigLib (YACL)](https://modrinth.com/mod/yacl) | ⚙️ **Optional** |
-| [Mod Menu](https://modrinth.com/mod/modmenu) | ⭐ **Recommended (FABRIC)** |
-| [Sodium](https://modrinth.com/mod/sodium) | ✅ **Compatible** |
-| [Sodium FPS Cap Fix](https://modrinth.com/mod/sodiumfpscapfix) | ✅ **Compatible** |
-| [Iris](https://modrinth.com/mod/iris) | ✅ **Compatible** |
-| [ImmediatelyFast](https://modrinth.com/mod/immediatelyfast) | ✅ **Compatible** |
+| [Mod Menu](https://modrinth.com/mod/modmenu) | ⚙️ **Optional (FABRIC)** |
+| [Sodium](https://modrinth.com/mod/sodium) | ✅ **Optional compatibility** |
+| [Sodium FPS Cap Fix](https://modrinth.com/mod/sodiumfpscapfix) | ✅ **Optional compatibility** |
 
-If neither Cloth Config nor YACL is installed, NeoForge still provides its built-in settings screen. On Fabric, settings can be loaded from `config/accuratefpsplus.json` without either library. The custom framerate limit is stored separately in `config/accuratefpsplus-fps.json`.
+The Cloth Config and YACL screens show only controls relevant to the current saved settings: custom coordinates only for the custom anchor, overlay color/transparency only when the overlay is enabled, per-metric details only for enabled metrics, and coloring/telemetry controls only when their related metrics and modes are active. Dependent controls refresh when the settings screen is reopened after changing their enabling option.
+
+**Dependency status:** Minecraft and the selected loader are required; Fabric API is required on Fabric. Cloth Config and YACL are optional alternative settings-screen libraries. Mod Menu is a separate optional Fabric mod-list entry point, not a settings-screen library; it opens the selected optional screen when available and does not require Cloth Config. Mod Menu's published Fabric versions declare Fabric API and Text Placeholder API as their dependencies, not Cloth Config. Sodium is optional for its FPS slider integration; Sodium FPS Cap Fix is recognized for FPS-slider conflict avoidance. **Embedded dependencies: none.** Settings are also stored in `config/accuratefpsplus.json`; the custom framerate limit is stored separately in `config/accuratefpsplus-fps.json`.
 
 Optional mods and rendering combinations are not all tested together. Compatibility can depend on the exact Minecraft version and mod versions.
 

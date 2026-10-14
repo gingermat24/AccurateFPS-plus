@@ -15,13 +15,15 @@ public final class AccurateFpsPlusFabricClient implements ClientModInitializer {
 
         KeyMapping toggleKey = AccurateFpsPlusClient.createToggleKeyMapping();
         KeyMapping presetCycleKey = AccurateFpsPlusClient.createKeyMapping("key.accuratefpsplus.cyclePreset");
-        if (toggleKey != null) {
-            KeyBindingHelper.registerKeyBinding(toggleKey);
+        KeyMapping openConfigKey = ConfigScreenRouter.hasAvailableScreen()
+            ? AccurateFpsPlusClient.createKeyMapping("key.accuratefpsplus.openConfig")
+            : null;
+        KeyBindingHelper.registerKeyBinding(toggleKey);
+        KeyBindingHelper.registerKeyBinding(presetCycleKey);
+        if (openConfigKey != null) {
+            KeyBindingHelper.registerKeyBinding(openConfigKey);
         }
-        if (presetCycleKey != null) {
-            KeyBindingHelper.registerKeyBinding(presetCycleKey);
-        }
-        AccurateFpsPlusClient.setKeyMappings(toggleKey, presetCycleKey);
+        AccurateFpsPlusClient.setKeyMappings(toggleKey, presetCycleKey, openConfigKey);
 
         ClientTickEvents.END_CLIENT_TICK.register(AccurateFpsPlusClient::onClientTick);
         HudRenderCallback.EVENT.register((graphics, tickCounter) -> AccurateFpsPlusClient.renderHud(graphics));

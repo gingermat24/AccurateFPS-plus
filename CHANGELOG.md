@@ -1,6 +1,26 @@
 # Changelog
 
-## 1.2-r2 - 12/10/2026
+## 1.3-r1 - Unreleased
+
+- Updated Fabric Loom from 1.18.3 to 1.18.4 for both Fabric Minecraft targets.
+- Fixed invisible setting names in the NeoForge 1.21.11 native settings screen by drawing custom text with opaque colors; buttons display only their selected values.
+- Kept the NeoForge Mods-list settings screen as a native fallback when neither optional screen library is installed; Fabric configuration still requires Cloth Config or YACL.
+- Kept the unbound Open Configuration keybind on both loaders; Fabric Mod Menu entries require at least one supported screen library, while NeoForge always provides its Mods-list settings entry.
+- Kept Cloth Config and YACL optional and independent; if both are installed, users can choose between them, with Cloth Config selected by default.
+- Preserved the saved screen preference when migrating existing configuration files.
+- Hide the Settings Screen selector unless both screen libraries are installed; route Mod Menu, NeoForge, and the keybind through the same saved preference.
+- Added a persistent HUD Size slider from 1% to 200% (100% default), scaling both HUD lines, layout, anchor clamping, and the background overlay.
+- Made both optional settings screens contextual: hide custom coordinates, inactive metric details, and unused overlay/coloring controls; Engine tuning settings remain visible regardless of enabled metrics.
+- Kept third-party UI libraries optional and unembedded.
+- Aligned Fabric keybind categories with their NeoForge counterparts.
+- Pause telemetry while the HUD is disabled, a screen is open, or Hide with F3 is active; reset the frame-time and polling baseline on resume.
+- Discard active frame gaps of 1 second or longer so suspends and long interruptions do not become FPS, frametime, rolling-statistic, or percentile samples.
+- Calculate 1% Low and 0.1% Low from per-rendered-frame FPS observations using nearest-rank selection over the configured history window; small histories can still produce equal values when their selected ranks coincide.
+- Store percentile frame history in a time-windowed primitive ring and reuse a Quickselect workspace; calculate both lows from one copied sample set when their refreshes coincide.
+- Added deterministic tests for inactive intervals, one-second gaps, irregular frame durations, small sample windows, and distinct low-percentile ranks.
+- Synthetic engine-only stress profile (1,000 FPS, 60-second history, 1 ms statistic and percentile refresh intervals, 3 simulated seconds): elapsed time fell from 100.4 ms to 11.5 ms (about 88.5% lower), and allocation fell from 72.4 MB to 333 KB (about 99.5% lower). This is a synthetic engine-only measurement, not an in-game benchmark; it does not establish a gameplay performance gain.
+
+## 1.2-r2 - 2026-10-11
 
 - Added separate NeoForge release jars for Minecraft 1.21.1 and 1.21.11, while retaining the existing Fabric jars and the `1.2-r2` version.
 - Ported the HUD, all seven telemetry metrics, settings, presets, keybinds, F3 behavior, precise FPS slider, and optional Sodium slider integration to NeoForge.
@@ -50,13 +70,16 @@
   - Manual: Lets you specify exact FPS thresholds to match your display refresh rate or target performance.
 - Reorganized settings into 4 clean tabs (General, Metrics, Coloring, and Engine). All individual metrics are organized under expandable sections with concise, uncluttered tooltips.
 - Added dual config library support: use **either** Cloth Config **or** YetAnotherConfigLib (YACL v3) for in-game configuration. If neither is present, the mod runs cleanly with default settings and config file support.
-- Avoided replacing the vanilla framerate slider when recognized FPS-cap or FPS-textbox mods are installed, leaving those mods' controls in place.
-- Optimized percentile calculations (`quickSelect`) with median-of-three pivot selection and NaN sanitization, avoiding a full sort of the sample window.
+- Added soft compatibility for Sodium FPS Cap Fix and FPS textbox mods, yielding framerate limit controls when a dedicated textbox mod is installed.
+- Confirmed compatibility with Iris shaders and ImmediatelyFast HUD batching.
+- Optimized percentile calculations (`quickSelect`) with median-of-three pivot selection and NaN sanitization to ensure fast, stutter-free 1% and 0.1% low tracking.
 - Upgraded config storage with automatic migration for older settings, UTF-8 file encoding, and formatted JSON output.
 
 ## 1.0-r2 Refabricated - 14/09/2026
 
-This release restored the Fabric 1.21.11 build from the previously published JAR after the original project files were lost. It updated the 1.21.11 target only.
+**Finally managed to fix the code and recover everything directly from the uploaded JAR file!**
+
+_The only updated version is Fabric 1.21.11 (version with the most downloads), as updating would've been atrocious without the original multi-version build system._
 
 - Restored Fabric 1.21.11 compatibility and decompiled sources.
 - Fixed configuration loading so existing user settings are preserved instead of being overwritten with defaults.
@@ -65,6 +88,8 @@ This release restored the Fabric 1.21.11 build from the previously published JAR
 - Added Sodium compatibility for the max FPS slider.
 - Fixed `/accuratefps+ exportcsv` to generate proper comma-separated values.
 - Updated Cloth Config and Mod Menu integrations.
+
+_Note: Sadly, a lot of unreleased additions and features in progress were lost when the original project files were lost._
 
 ## 1.0-r1 02/05/2026
 

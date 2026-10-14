@@ -1,5 +1,6 @@
 package com.accuratefpsplus;
 
+import java.util.List;
 import java.util.Optional;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
@@ -28,43 +29,71 @@ public class ConfigScreen {
         general.addEntry((AbstractConfigListEntry)builder.entryBuilder().startBooleanToggle((Component)Component.translatable((String)"option.accuratefpsplus.toggleHUD"), AccurateFpsPlusClient.toggleHUD).setDefaultValue(true).setSaveConsumer(v -> {
             AccurateFpsPlusClient.toggleHUD = v;
         }).build());
-        general.addEntry((AbstractConfigListEntry)builder.entryBuilder().startBooleanToggle((Component)Component.translatable((String)"option.accuratefpsplus.hideWithF3"), AccurateFpsPlusClient.hideWithF3).setDefaultValue(true).setTooltip(new Component[]{Component.translatable((String)"tooltip.accuratefpsplus.hideWithF3")}).setSaveConsumer(v -> {
-            AccurateFpsPlusClient.hideWithF3 = v;
-        }).build());
+        if (AccurateFpsPlusClient.toggleHUD) {
+            general.addEntry((AbstractConfigListEntry)builder.entryBuilder().startBooleanToggle((Component)Component.translatable((String)"option.accuratefpsplus.hideWithF3"), AccurateFpsPlusClient.hideWithF3).setDefaultValue(true).setTooltip(new Component[]{Component.translatable((String)"tooltip.accuratefpsplus.hideWithF3")}).setSaveConsumer(v -> {
+                AccurateFpsPlusClient.hideWithF3 = v;
+            }).build());
+        }
         general.addEntry((AbstractConfigListEntry)builder.entryBuilder().startIntSlider((Component)Component.translatable((String)"option.accuratefpsplus.presetProfile"), AccurateFpsPlusClient.currentPreset, 0, 3).setDefaultValue(1).setTextGetter(ConfigScreen::presetLabel).setSaveConsumer(v -> {
             AccurateFpsPlusClient.currentPreset = v;
             selectedPreset[0] = v;
         }).setTooltip(new Component[]{Component.translatable((String)"tooltip.accuratefpsplus.presetProfile")}).build());
+        general.addEntry((AbstractConfigListEntry)builder.entryBuilder().startIntSlider(
+            (Component)Component.translatable((String)"option.accuratefpsplus.hudScale"),
+            AccurateFpsPlusClient.hudScalePercent, 1, 200
+        ).setDefaultValue(100).setTextGetter(value -> Component.translatable("value.accuratefpsplus.percent", value))
+            .setTooltip(new Component[]{Component.translatable((String)"tooltip.accuratefpsplus.hudScale")})
+            .setSaveConsumer(value -> {
+                AccurateFpsPlusClient.hudScalePercent = value;
+                AccurateFpsPlusClient.markHudDirty();
+            }).build());
+        List<Integer> screenPreferences = ConfigScreenRouter.availablePreferences();
+        if (screenPreferences.size() > 1) {
+            general.addEntry((AbstractConfigListEntry)builder.entryBuilder().startEnumSelector(
+                (Component)Component.translatable((String)"option.accuratefpsplus.configScreenPreference"),
+                ConfigScreenRouter.ScreenPreference.class,
+                ConfigScreenRouter.preferenceFromValue(AccurateFpsPlusClient.configScreenPreference)
+            ).setDefaultValue(ConfigScreenRouter.ScreenPreference.CLOTH)
+                .setEnumNameProvider(preference -> ConfigScreenRouter.preferenceLabel(
+                    ((ConfigScreenRouter.ScreenPreference)preference).value()))
+                .setTooltip(new Component[]{Component.translatable((String)"tooltip.accuratefpsplus.configScreenPreference")})
+                .setSaveConsumer(preference -> AccurateFpsPlusClient.configScreenPreference = preference.value())
+                .build());
+        }
         general.addEntry((AbstractConfigListEntry)builder.entryBuilder().startIntSlider((Component)Component.translatable((String)"option.accuratefpsplus.anchorCorner"), AccurateFpsPlusClient.anchorCorner, 0, 4).setDefaultValue(0).setTextGetter(ConfigScreen::anchorCornerLabel).setSaveConsumer(v -> {
             AccurateFpsPlusClient.anchorCorner = v;
         }).build());
-        general.addEntry((AbstractConfigListEntry)builder.entryBuilder().startIntField((Component)Component.translatable((String)"option.accuratefpsplus.xPos"), AccurateFpsPlusClient.xPos).setDefaultValue(5).setMin(0).setMax(0x7FFFFFFE).setSaveConsumer(v -> {
-            AccurateFpsPlusClient.xPos = v;
-        }).build());
-        general.addEntry((AbstractConfigListEntry)builder.entryBuilder().startIntField((Component)Component.translatable((String)"option.accuratefpsplus.yPos"), AccurateFpsPlusClient.yPos).setDefaultValue(5).setMin(0).setMax(0x7FFFFFFE).setSaveConsumer(v -> {
-            AccurateFpsPlusClient.yPos = v;
-        }).build());
+        if (AccurateFpsPlusClient.anchorCorner == 0) {
+            general.addEntry((AbstractConfigListEntry)builder.entryBuilder().startIntField((Component)Component.translatable((String)"option.accuratefpsplus.xPos"), AccurateFpsPlusClient.xPos).setDefaultValue(5).setMin(0).setMax(0x7FFFFFFE).setSaveConsumer(v -> {
+                AccurateFpsPlusClient.xPos = v;
+            }).build());
+            general.addEntry((AbstractConfigListEntry)builder.entryBuilder().startIntField((Component)Component.translatable((String)"option.accuratefpsplus.yPos"), AccurateFpsPlusClient.yPos).setDefaultValue(5).setMin(0).setMax(0x7FFFFFFE).setSaveConsumer(v -> {
+                AccurateFpsPlusClient.yPos = v;
+            }).build());
+        }
         general.addEntry((AbstractConfigListEntry)builder.entryBuilder().startBooleanToggle((Component)Component.translatable((String)"option.accuratefpsplus.shadow"), AccurateFpsPlusClient.shadow).setDefaultValue(true).setSaveConsumer(v -> {
             AccurateFpsPlusClient.shadow = v;
         }).build());
         general.addEntry((AbstractConfigListEntry)builder.entryBuilder().startBooleanToggle((Component)Component.translatable((String)"option.accuratefpsplus.darkModeOverlay"), AccurateFpsPlusClient.darkModeOverlay).setDefaultValue(false).setSaveConsumer(v -> {
             AccurateFpsPlusClient.darkModeOverlay = v;
         }).build());
-        general.addEntry((AbstractConfigListEntry)builder.entryBuilder().startTextField((Component)Component.translatable((String)"option.accuratefpsplus.overlayColor"), String.format("%06X", AccurateFpsPlusClient.overlayColor)).setDefaultValue("000000").setSaveConsumer(v -> {
-            String sanitized = v.replace("#", "").trim();
-            if (sanitized.isEmpty()) {
-                return;
-            }
-            if (!sanitized.matches("[0-9A-Fa-f]{6}")) {
-                return;
-            }
-            AccurateFpsPlusClient.overlayColor = Integer.parseInt(sanitized, 16);
-            AccurateFpsPlusClient.updateCachedOverlayColor();
-        }).setErrorSupplier(v -> v.matches("^#?[0-9A-Fa-f]{6}$") ? Optional.empty() : Optional.of(Component.translatable((String)"error.accuratefpsplus.invalidColor"))).build());
-        general.addEntry((AbstractConfigListEntry)builder.entryBuilder().startIntSlider((Component)Component.translatable((String)"option.accuratefpsplus.overlayTransparency"), AccurateFpsPlusClient.overlayTransparency, 0, 100).setDefaultValue(50).setSaveConsumer(v -> {
-            AccurateFpsPlusClient.overlayTransparency = v;
-            AccurateFpsPlusClient.updateCachedOverlayColor();
-        }).build());
+        if (AccurateFpsPlusClient.darkModeOverlay) {
+            general.addEntry((AbstractConfigListEntry)builder.entryBuilder().startTextField((Component)Component.translatable((String)"option.accuratefpsplus.overlayColor"), String.format("%06X", AccurateFpsPlusClient.overlayColor)).setDefaultValue("000000").setSaveConsumer(v -> {
+                String sanitized = v.replace("#", "").trim();
+                if (sanitized.isEmpty()) {
+                    return;
+                }
+                if (!sanitized.matches("[0-9A-Fa-f]{6}")) {
+                    return;
+                }
+                AccurateFpsPlusClient.overlayColor = Integer.parseInt(sanitized, 16);
+                AccurateFpsPlusClient.updateCachedOverlayColor();
+            }).setErrorSupplier(v -> v.matches("^#?[0-9A-Fa-f]{6}$") ? Optional.empty() : Optional.of(Component.translatable((String)"error.accuratefpsplus.invalidColor"))).build());
+            general.addEntry((AbstractConfigListEntry)builder.entryBuilder().startIntSlider((Component)Component.translatable((String)"option.accuratefpsplus.overlayTransparency"), AccurateFpsPlusClient.overlayTransparency, 0, 100).setDefaultValue(50).setSaveConsumer(v -> {
+                AccurateFpsPlusClient.overlayTransparency = v;
+                AccurateFpsPlusClient.updateCachedOverlayColor();
+            }).build());
+        }
 
         // Metrics (single consolidated category with expandable subcategories)
         ConfigCategory metrics = builder.getOrCreateCategory((Component)Component.translatable((String)"category.accuratefpsplus.metrics"));
@@ -175,45 +204,50 @@ public class ConfigScreen {
         });
 
         // Coloring
-        ConfigCategory coloring = builder.getOrCreateCategory((Component)Component.translatable((String)"category.accuratefpsplus.coloring"));
-        coloring.addEntry((AbstractConfigListEntry)builder.entryBuilder().startEnumSelector(
+        if (hasAutoColorMetric()) {
+            ConfigCategory coloring = builder.getOrCreateCategory((Component)Component.translatable((String)"category.accuratefpsplus.coloring"));
+            coloring.addEntry((AbstractConfigListEntry)builder.entryBuilder().startEnumSelector(
             (Component)Component.translatable((String)"option.accuratefpsplus.colorThresholdMode"),
             ThresholdMode.class,
             AccurateFpsPlusClient.colorThresholdMode == 1 ? ThresholdMode.MANUAL : ThresholdMode.AUTOMATIC
-        ).setDefaultValue(ThresholdMode.AUTOMATIC).setEnumNameProvider(mode -> switch ((ThresholdMode)mode) {
-            case MANUAL -> Component.translatable((String)"value.accuratefpsplus.thresholdMode.manual");
-            default -> Component.translatable((String)"value.accuratefpsplus.thresholdMode.automatic");
-        }).setSaveConsumer(mode -> {
-            AccurateFpsPlusClient.colorThresholdMode = (mode == ThresholdMode.MANUAL ? 1 : 0);
-        }).setTooltip(new Component[]{Component.translatable((String)"tooltip.accuratefpsplus.colorThresholdMode")}).build());
+            ).setDefaultValue(ThresholdMode.AUTOMATIC).setEnumNameProvider(mode -> switch ((ThresholdMode)mode) {
+                case MANUAL -> Component.translatable((String)"value.accuratefpsplus.thresholdMode.manual");
+                default -> Component.translatable((String)"value.accuratefpsplus.thresholdMode.automatic");
+            }).setSaveConsumer(mode -> {
+                AccurateFpsPlusClient.colorThresholdMode = (mode == ThresholdMode.MANUAL ? 1 : 0);
+            }).setTooltip(new Component[]{Component.translatable((String)"tooltip.accuratefpsplus.colorThresholdMode")}).build());
 
-        coloring.addEntry((AbstractConfigListEntry)builder.entryBuilder().startColorField((Component)Component.translatable((String)"option.accuratefpsplus.gradientColorLow"), AccurateFpsPlusClient.gradientColorLow).setDefaultValue(0xFF5555).setSaveConsumer(v -> {
-            AccurateFpsPlusClient.gradientColorLow = v & 0xFFFFFF;
-        }).build());
-        coloring.addEntry((AbstractConfigListEntry)builder.entryBuilder().startColorField((Component)Component.translatable((String)"option.accuratefpsplus.gradientColorMed"), AccurateFpsPlusClient.gradientColorMed).setDefaultValue(0xFFFF55).setSaveConsumer(v -> {
-            AccurateFpsPlusClient.gradientColorMed = v & 0xFFFFFF;
-        }).build());
-        coloring.addEntry((AbstractConfigListEntry)builder.entryBuilder().startColorField((Component)Component.translatable((String)"option.accuratefpsplus.gradientColorHigh"), AccurateFpsPlusClient.gradientColorHigh).setDefaultValue(0x55FF55).setSaveConsumer(v -> {
-            AccurateFpsPlusClient.gradientColorHigh = v & 0xFFFFFF;
-        }).build());
-        coloring.addEntry((AbstractConfigListEntry)builder.entryBuilder().startIntField((Component)Component.translatable((String)"option.accuratefpsplus.manualThresholdLow"), AccurateFpsPlusClient.manualThresholdLow).setDefaultValue(30).setMin(1).setMax(1000).setSaveConsumer(v -> {
-            AccurateFpsPlusClient.manualThresholdLow = v;
-        }).build());
-        coloring.addEntry((AbstractConfigListEntry)builder.entryBuilder().startIntField((Component)Component.translatable((String)"option.accuratefpsplus.manualThresholdMed"), AccurateFpsPlusClient.manualThresholdMed).setDefaultValue(60).setMin(1).setMax(1000).setSaveConsumer(v -> {
-            AccurateFpsPlusClient.manualThresholdMed = v;
-        }).build());
-        coloring.addEntry((AbstractConfigListEntry)builder.entryBuilder().startIntField((Component)Component.translatable((String)"option.accuratefpsplus.manualThresholdHigh"), AccurateFpsPlusClient.manualThresholdHigh).setDefaultValue(120).setMin(1).setMax(1000).setSaveConsumer(v -> {
-            AccurateFpsPlusClient.manualThresholdHigh = v;
-        }).build());
-        coloring.addEntry((AbstractConfigListEntry)builder.entryBuilder().startBooleanToggle((Component)Component.translatable((String)"option.accuratefpsplus.detectDisplayHz"), false).setDefaultValue(false).setTooltip(new Component[]{Component.translatable((String)"tooltip.accuratefpsplus.detectDisplayHz")}).setSaveConsumer(v -> {
-            if (v) {
-                int hz = AccurateFpsPlusClient.detectDisplayRefreshRate();
-                AccurateFpsPlusClient.manualThresholdHigh = hz;
-                AccurateFpsPlusClient.manualThresholdMed = Math.max(1, (int) Math.round(hz * 0.75));
-                AccurateFpsPlusClient.manualThresholdLow = Math.max(1, (int) Math.round(hz * 0.50));
-                AccurateFpsPlusClient.colorThresholdMode = 1;
+            if (AccurateFpsPlusClient.colorThresholdMode == 0) {
+                coloring.addEntry((AbstractConfigListEntry)builder.entryBuilder().startColorField((Component)Component.translatable((String)"option.accuratefpsplus.gradientColorLow"), AccurateFpsPlusClient.gradientColorLow).setDefaultValue(0xFF5555).setSaveConsumer(v -> {
+                    AccurateFpsPlusClient.gradientColorLow = v & 0xFFFFFF;
+                }).build());
+                coloring.addEntry((AbstractConfigListEntry)builder.entryBuilder().startColorField((Component)Component.translatable((String)"option.accuratefpsplus.gradientColorMed"), AccurateFpsPlusClient.gradientColorMed).setDefaultValue(0xFFFF55).setSaveConsumer(v -> {
+                    AccurateFpsPlusClient.gradientColorMed = v & 0xFFFFFF;
+                }).build());
+                coloring.addEntry((AbstractConfigListEntry)builder.entryBuilder().startColorField((Component)Component.translatable((String)"option.accuratefpsplus.gradientColorHigh"), AccurateFpsPlusClient.gradientColorHigh).setDefaultValue(0x55FF55).setSaveConsumer(v -> {
+                    AccurateFpsPlusClient.gradientColorHigh = v & 0xFFFFFF;
+                }).build());
+            } else {
+                coloring.addEntry((AbstractConfigListEntry)builder.entryBuilder().startIntField((Component)Component.translatable((String)"option.accuratefpsplus.manualThresholdLow"), AccurateFpsPlusClient.manualThresholdLow).setDefaultValue(30).setMin(1).setMax(1000).setSaveConsumer(v -> {
+                    AccurateFpsPlusClient.manualThresholdLow = v;
+                }).build());
+                coloring.addEntry((AbstractConfigListEntry)builder.entryBuilder().startIntField((Component)Component.translatable((String)"option.accuratefpsplus.manualThresholdMed"), AccurateFpsPlusClient.manualThresholdMed).setDefaultValue(60).setMin(1).setMax(1000).setSaveConsumer(v -> {
+                    AccurateFpsPlusClient.manualThresholdMed = v;
+                }).build());
+                coloring.addEntry((AbstractConfigListEntry)builder.entryBuilder().startIntField((Component)Component.translatable((String)"option.accuratefpsplus.manualThresholdHigh"), AccurateFpsPlusClient.manualThresholdHigh).setDefaultValue(120).setMin(1).setMax(1000).setSaveConsumer(v -> {
+                    AccurateFpsPlusClient.manualThresholdHigh = v;
+                }).build());
+                coloring.addEntry((AbstractConfigListEntry)builder.entryBuilder().startBooleanToggle((Component)Component.translatable((String)"option.accuratefpsplus.detectDisplayHz"), false).setDefaultValue(false).setTooltip(new Component[]{Component.translatable((String)"tooltip.accuratefpsplus.detectDisplayHz")}).setSaveConsumer(v -> {
+                    if (v) {
+                        int hz = AccurateFpsPlusClient.detectDisplayRefreshRate();
+                        AccurateFpsPlusClient.manualThresholdHigh = hz;
+                        AccurateFpsPlusClient.manualThresholdMed = Math.max(1, (int) Math.round(hz * 0.75));
+                        AccurateFpsPlusClient.manualThresholdLow = Math.max(1, (int) Math.round(hz * 0.50));
+                        AccurateFpsPlusClient.colorThresholdMode = 1;
+                    }
+                }).build());
             }
-        }).build());
+        }
 
         // Engine
         ConfigCategory engine = builder.getOrCreateCategory((Component)Component.translatable((String)"category.accuratefpsplus.engine"));
@@ -291,24 +325,28 @@ public class ConfigScreen {
             showSet.accept((boolean)v);
             AccurateFpsPlusClient.currentPreset = 0;
         }).build());
-        sub.add((AbstractConfigListEntry)builder.entryBuilder().startIntSlider(
-            (Component)Component.translatable((String)("option.accuratefpsplus." + posKey)), posVal, 1, posMax
-        ).setDefaultValue(posDefault).setTextGetter(ConfigScreen::slotLabel).setSaveConsumer(v -> posSet.accept((int)v)).build());
-        sub.add((AbstractConfigListEntry)builder.entryBuilder().startIntSlider(
-            (Component)Component.translatable((String)("option.accuratefpsplus." + precKey)), precVal, 0, 4
-        ).setDefaultValue(precDefault).setSaveConsumer(v -> precSet.accept((int)v)).build());
-        sub.add((AbstractConfigListEntry)builder.entryBuilder().startTextField(
-            (Component)Component.translatable((String)("option.accuratefpsplus." + beforeKey)), beforeVal != null ? beforeVal : beforeDefault
-        ).setDefaultValue(beforeDefault).setSaveConsumer(v -> beforeSet.accept((String)v)).build());
-        sub.add((AbstractConfigListEntry)builder.entryBuilder().startTextField(
-            (Component)Component.translatable((String)("option.accuratefpsplus." + afterKey)), afterVal != null ? afterVal : afterDefault
-        ).setDefaultValue(afterDefault).setSaveConsumer(v -> afterSet.accept((String)v)).build());
-        sub.add((AbstractConfigListEntry)builder.entryBuilder().startColorField(
-            (Component)Component.translatable((String)("option.accuratefpsplus." + colorKey)), colorVal
-        ).setDefaultValue(0xFFFFFF).setSaveConsumer(v -> colorSet.accept(v & 0xFFFFFF)).build());
-        sub.add((AbstractConfigListEntry)builder.entryBuilder().startBooleanToggle(
-            (Component)Component.translatable((String)("option.accuratefpsplus." + autoColorKey)), autoColorVal
-        ).setDefaultValue(autoColorDefault).setSaveConsumer(v -> autoColorSet.accept((boolean)v)).setTooltip(new Component[]{Component.translatable((String)"tooltip.accuratefpsplus.autoColor")}).build());
+        if (showVal) {
+            sub.add((AbstractConfigListEntry)builder.entryBuilder().startIntSlider(
+                (Component)Component.translatable((String)("option.accuratefpsplus." + posKey)), posVal, 1, posMax
+            ).setDefaultValue(posDefault).setTextGetter(ConfigScreen::slotLabel).setSaveConsumer(v -> posSet.accept((int)v)).build());
+            sub.add((AbstractConfigListEntry)builder.entryBuilder().startIntSlider(
+                (Component)Component.translatable((String)("option.accuratefpsplus." + precKey)), precVal, 0, 4
+            ).setDefaultValue(precDefault).setSaveConsumer(v -> precSet.accept((int)v)).build());
+            sub.add((AbstractConfigListEntry)builder.entryBuilder().startTextField(
+                (Component)Component.translatable((String)("option.accuratefpsplus." + beforeKey)), beforeVal != null ? beforeVal : beforeDefault
+            ).setDefaultValue(beforeDefault).setSaveConsumer(v -> beforeSet.accept((String)v)).build());
+            sub.add((AbstractConfigListEntry)builder.entryBuilder().startTextField(
+                (Component)Component.translatable((String)("option.accuratefpsplus." + afterKey)), afterVal != null ? afterVal : afterDefault
+            ).setDefaultValue(afterDefault).setSaveConsumer(v -> afterSet.accept((String)v)).build());
+            sub.add((AbstractConfigListEntry)builder.entryBuilder().startBooleanToggle(
+                (Component)Component.translatable((String)("option.accuratefpsplus." + autoColorKey)), autoColorVal
+            ).setDefaultValue(autoColorDefault).setSaveConsumer(v -> autoColorSet.accept((boolean)v)).setTooltip(new Component[]{Component.translatable((String)"tooltip.accuratefpsplus.autoColor")}).build());
+            if (!autoColorVal) {
+                sub.add((AbstractConfigListEntry)builder.entryBuilder().startColorField(
+                    (Component)Component.translatable((String)("option.accuratefpsplus." + colorKey)), colorVal
+                ).setDefaultValue(0xFFFFFF).setSaveConsumer(v -> colorSet.accept(v & 0xFFFFFF)).build());
+            }
+        }
         parentCategory.addEntry((AbstractConfigListEntry)sub.build());
     }
 
@@ -318,6 +356,16 @@ public class ConfigScreen {
             return i;
         }
         return HISTORY_WINDOW_OPTIONS.length - 1;
+    }
+
+    private static boolean hasAutoColorMetric() {
+        return (AccurateFpsPlusClient.showFps && AccurateFpsPlusClient.fpsAutoColor)
+            || (AccurateFpsPlusClient.showFrametime && AccurateFpsPlusClient.frametimeAutoColor)
+            || (AccurateFpsPlusClient.showAvr && AccurateFpsPlusClient.avrAutoColor)
+            || (AccurateFpsPlusClient.showMax && AccurateFpsPlusClient.maxAutoColor)
+            || (AccurateFpsPlusClient.showMin && AccurateFpsPlusClient.minAutoColor)
+            || (AccurateFpsPlusClient.showOnePercentLow && AccurateFpsPlusClient.onePercentLowAutoColor)
+            || (AccurateFpsPlusClient.showZeroOnePercentLow && AccurateFpsPlusClient.zeroOnePercentLowAutoColor);
     }
 
     private static Component calculationModeLabel(int value) {

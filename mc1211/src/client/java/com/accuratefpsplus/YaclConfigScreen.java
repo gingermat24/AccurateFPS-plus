@@ -6,12 +6,14 @@ import dev.isxander.yacl3.api.OptionDescription;
 import dev.isxander.yacl3.api.OptionGroup;
 import dev.isxander.yacl3.api.YetAnotherConfigLib;
 import dev.isxander.yacl3.api.controller.ColorControllerBuilder;
+import dev.isxander.yacl3.api.controller.CyclingListControllerBuilder;
 import dev.isxander.yacl3.api.controller.EnumControllerBuilder;
 import dev.isxander.yacl3.api.controller.IntegerFieldControllerBuilder;
 import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder;
 import dev.isxander.yacl3.api.controller.StringControllerBuilder;
 import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder;
 import java.awt.Color;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import net.minecraft.client.gui.screens.Screen;
@@ -24,6 +26,7 @@ public class YaclConfigScreen {
         int initialPreset = AccurateFpsPlusClient.currentPreset;
         int[] selectedPreset = new int[]{initialPreset};
         boolean[] customVisibilityChanged = new boolean[]{false};
+        List<Integer> screenPreferences = ConfigScreenRouter.availablePreferences();
 
         YetAnotherConfigLib.Builder builder = YetAnotherConfigLib.createBuilder()
             .title(Component.translatable("title.accuratefpsplus.config"))
@@ -40,20 +43,22 @@ public class YaclConfigScreen {
             });
 
         // 1. General Category
-        ConfigCategory generalCategory = ConfigCategory.createBuilder()
-            .name(Component.translatable("category.accuratefpsplus.general"))
-            .option(Option.<Boolean>createBuilder()
+        ConfigCategory.Builder generalBuilder = ConfigCategory.createBuilder()
+            .name(Component.translatable("category.accuratefpsplus.general"));
+        generalBuilder.option(Option.<Boolean>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus.toggleHUD"))
                 .binding(true, () -> AccurateFpsPlusClient.toggleHUD, v -> AccurateFpsPlusClient.toggleHUD = v)
                 .controller(TickBoxControllerBuilder::create)
-                .build())
-            .option(Option.<Boolean>createBuilder()
+                .build());
+        if (AccurateFpsPlusClient.toggleHUD) {
+            generalBuilder.option(Option.<Boolean>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus.hideWithF3"))
                 .description(OptionDescription.of(Component.translatable("tooltip.accuratefpsplus.hideWithF3")))
                 .binding(true, () -> AccurateFpsPlusClient.hideWithF3, v -> AccurateFpsPlusClient.hideWithF3 = v)
                 .controller(TickBoxControllerBuilder::create)
-                .build())
-            .option(Option.<Integer>createBuilder()
+                .build());
+        }
+        generalBuilder.option(Option.<Integer>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus.presetProfile"))
                 .description(OptionDescription.of(Component.translatable("tooltip.accuratefpsplus.presetProfile")))
                 .binding(1, () -> AccurateFpsPlusClient.currentPreset, v -> {
@@ -61,49 +66,77 @@ public class YaclConfigScreen {
                     selectedPreset[0] = v;
                 })
                 .controller(opt -> IntegerSliderControllerBuilder.create(opt).range(0, 3).step(1).formatValue(YaclConfigScreen::presetLabel))
-                .build())
-            .option(Option.<Integer>createBuilder()
+                .build());
+        generalBuilder.option(Option.<Integer>createBuilder()
+                .name(Component.translatable("option.accuratefpsplus.hudScale"))
+                .description(OptionDescription.of(Component.translatable("tooltip.accuratefpsplus.hudScale")))
+                .binding(100, () -> AccurateFpsPlusClient.hudScalePercent, value -> {
+                    AccurateFpsPlusClient.hudScalePercent = value;
+                    AccurateFpsPlusClient.markHudDirty();
+                })
+                .controller(opt -> IntegerSliderControllerBuilder.create(opt).range(1, 200).step(1)
+                    .formatValue(value -> Component.translatable("value.accuratefpsplus.percent", value)))
+                .build());
+        if (screenPreferences.size() > 1) {
+            generalBuilder.option(Option.<Integer>createBuilder()
+                .name(Component.translatable("option.accuratefpsplus.configScreenPreference"))
+                .description(OptionDescription.of(Component.translatable("tooltip.accuratefpsplus.configScreenPreference")))
+                .binding(
+                    ConfigScreenRouter.defaultPreference(),
+                    () -> AccurateFpsPlusClient.configScreenPreference,
+                    preference -> AccurateFpsPlusClient.configScreenPreference = preference
+                )
+                .controller(opt -> CyclingListControllerBuilder.create(opt)
+                    .values(screenPreferences)
+                    .formatValue(ConfigScreenRouter::preferenceLabel))
+                .build());
+        }
+        generalBuilder.option(Option.<Integer>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus.anchorCorner"))
                 .binding(0, () -> AccurateFpsPlusClient.anchorCorner, v -> AccurateFpsPlusClient.anchorCorner = v)
                 .controller(opt -> IntegerSliderControllerBuilder.create(opt).range(0, 4).step(1).formatValue(YaclConfigScreen::anchorCornerLabel))
-                .build())
-            .option(Option.<Integer>createBuilder()
+                .build());
+        if (AccurateFpsPlusClient.anchorCorner == 0) {
+            generalBuilder.option(Option.<Integer>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus.xPos"))
                 .binding(5, () -> AccurateFpsPlusClient.xPos, v -> AccurateFpsPlusClient.xPos = v)
                 .controller(opt -> IntegerFieldControllerBuilder.create(opt).min(0).max(0x7FFFFFFE))
-                .build())
-            .option(Option.<Integer>createBuilder()
+                .build());
+            generalBuilder.option(Option.<Integer>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus.yPos"))
                 .binding(5, () -> AccurateFpsPlusClient.yPos, v -> AccurateFpsPlusClient.yPos = v)
                 .controller(opt -> IntegerFieldControllerBuilder.create(opt).min(0).max(0x7FFFFFFE))
-                .build())
-            .option(Option.<Boolean>createBuilder()
+                .build());
+        }
+        generalBuilder.option(Option.<Boolean>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus.shadow"))
                 .binding(true, () -> AccurateFpsPlusClient.shadow, v -> AccurateFpsPlusClient.shadow = v)
                 .controller(TickBoxControllerBuilder::create)
-                .build())
-            .option(Option.<Boolean>createBuilder()
+                .build());
+        generalBuilder.option(Option.<Boolean>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus.darkModeOverlay"))
                 .binding(false, () -> AccurateFpsPlusClient.darkModeOverlay, v -> AccurateFpsPlusClient.darkModeOverlay = v)
                 .controller(TickBoxControllerBuilder::create)
-                .build())
-            .option(Option.<Color>createBuilder()
+                .build());
+        if (AccurateFpsPlusClient.darkModeOverlay) {
+            generalBuilder.option(Option.<Color>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus.overlayColor"))
                 .binding(new Color(0x000000), () -> new Color(AccurateFpsPlusClient.overlayColor), c -> {
                     AccurateFpsPlusClient.overlayColor = c.getRGB() & 0xFFFFFF;
                     AccurateFpsPlusClient.updateCachedOverlayColor();
                 })
                 .controller(opt -> ColorControllerBuilder.create(opt).allowAlpha(false))
-                .build())
-            .option(Option.<Integer>createBuilder()
+                .build());
+            generalBuilder.option(Option.<Integer>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus.overlayTransparency"))
                 .binding(50, () -> AccurateFpsPlusClient.overlayTransparency, v -> {
                     AccurateFpsPlusClient.overlayTransparency = v;
                     AccurateFpsPlusClient.updateCachedOverlayColor();
                 })
                 .controller(opt -> IntegerSliderControllerBuilder.create(opt).range(0, 100).step(1))
-                .build())
-            .build();
+                .build());
+        }
+        ConfigCategory generalCategory = generalBuilder.build();
 
         // 2. Metrics Category
         ConfigCategory metricsCategory = ConfigCategory.createBuilder()
@@ -188,9 +221,10 @@ public class YaclConfigScreen {
             .build();
 
         // 3. Coloring Category
-        ConfigCategory coloringCategory = ConfigCategory.createBuilder()
-            .name(Component.translatable("category.accuratefpsplus.coloring"))
-            .option(Option.<ThresholdMode>createBuilder()
+        ConfigCategory.Builder coloringBuilder = ConfigCategory.createBuilder()
+            .name(Component.translatable("category.accuratefpsplus.coloring"));
+        if (hasAutoColorMetric()) {
+            coloringBuilder.option(Option.<ThresholdMode>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus.colorThresholdMode"))
                 .description(OptionDescription.of(Component.translatable("tooltip.accuratefpsplus.colorThresholdMode")))
                 .binding(
@@ -204,38 +238,40 @@ public class YaclConfigScreen {
                         case MANUAL -> Component.translatable("value.accuratefpsplus.thresholdMode.manual");
                         default -> Component.translatable("value.accuratefpsplus.thresholdMode.automatic");
                     }))
-                .build())
-            .option(Option.<Color>createBuilder()
+                .build());
+            if (AccurateFpsPlusClient.colorThresholdMode == 0) {
+                coloringBuilder.option(Option.<Color>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus.gradientColorLow"))
                 .binding(new Color(0xFF5555), () -> new Color(AccurateFpsPlusClient.gradientColorLow), c -> AccurateFpsPlusClient.gradientColorLow = c.getRGB() & 0xFFFFFF)
                 .controller(opt -> ColorControllerBuilder.create(opt).allowAlpha(false))
-                .build())
-            .option(Option.<Color>createBuilder()
+                .build());
+                coloringBuilder.option(Option.<Color>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus.gradientColorMed"))
                 .binding(new Color(0xFFFF55), () -> new Color(AccurateFpsPlusClient.gradientColorMed), c -> AccurateFpsPlusClient.gradientColorMed = c.getRGB() & 0xFFFFFF)
                 .controller(opt -> ColorControllerBuilder.create(opt).allowAlpha(false))
-                .build())
-            .option(Option.<Color>createBuilder()
+                .build());
+                coloringBuilder.option(Option.<Color>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus.gradientColorHigh"))
                 .binding(new Color(0x55FF55), () -> new Color(AccurateFpsPlusClient.gradientColorHigh), c -> AccurateFpsPlusClient.gradientColorHigh = c.getRGB() & 0xFFFFFF)
                 .controller(opt -> ColorControllerBuilder.create(opt).allowAlpha(false))
-                .build())
-            .option(Option.<Integer>createBuilder()
+                .build());
+            } else {
+                coloringBuilder.option(Option.<Integer>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus.manualThresholdLow"))
                 .binding(30, () -> AccurateFpsPlusClient.manualThresholdLow, v -> AccurateFpsPlusClient.manualThresholdLow = v)
                 .controller(opt -> IntegerFieldControllerBuilder.create(opt).range(1, 1000))
-                .build())
-            .option(Option.<Integer>createBuilder()
+                .build());
+                coloringBuilder.option(Option.<Integer>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus.manualThresholdMed"))
                 .binding(60, () -> AccurateFpsPlusClient.manualThresholdMed, v -> AccurateFpsPlusClient.manualThresholdMed = v)
                 .controller(opt -> IntegerFieldControllerBuilder.create(opt).range(1, 1000))
-                .build())
-            .option(Option.<Integer>createBuilder()
+                .build());
+                coloringBuilder.option(Option.<Integer>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus.manualThresholdHigh"))
                 .binding(120, () -> AccurateFpsPlusClient.manualThresholdHigh, v -> AccurateFpsPlusClient.manualThresholdHigh = v)
                 .controller(opt -> IntegerFieldControllerBuilder.create(opt).range(1, 1000))
-                .build())
-            .option(Option.<Boolean>createBuilder()
+                .build());
+                coloringBuilder.option(Option.<Boolean>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus.detectDisplayHz"))
                 .description(OptionDescription.of(Component.translatable("tooltip.accuratefpsplus.detectDisplayHz")))
                 .binding(
@@ -252,13 +288,15 @@ public class YaclConfigScreen {
                     }
                 )
                 .controller(TickBoxControllerBuilder::create)
-                .build())
-            .build();
+                .build());
+            }
+        }
+        ConfigCategory coloringCategory = coloringBuilder.build();
 
         // 4. Engine Category
-        ConfigCategory engineCategory = ConfigCategory.createBuilder()
-            .name(Component.translatable("category.accuratefpsplus.engine"))
-            .option(Option.<Integer>createBuilder()
+        ConfigCategory.Builder engineBuilder = ConfigCategory.createBuilder()
+            .name(Component.translatable("category.accuratefpsplus.engine"));
+        engineBuilder.option(Option.<Integer>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus.calculationMode"))
                 .description(OptionDescription.of(Component.translatable("tooltip.accuratefpsplus.calculationMode")))
                 .binding(1, () -> AccurateFpsPlusClient.calculationMode, v -> {
@@ -266,57 +304,56 @@ public class YaclConfigScreen {
                     AccurateFpsPlusClient.telemetryEngine.setCalculationMode(v);
                 })
                 .controller(opt -> IntegerSliderControllerBuilder.create(opt).range(0, 2).step(1).formatValue(YaclConfigScreen::calculationModeLabel))
-                .build())
-            .option(Option.<Integer>createBuilder()
+                .build());
+        engineBuilder.option(Option.<Integer>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus.historyWindow"))
                 .description(OptionDescription.of(Component.translatable("tooltip.accuratefpsplus.historyWindow")))
                 .binding(historyWindowToIndex(5), () -> historyWindowToIndex(AccurateFpsPlusClient.historyWindowSeconds), i -> AccurateFpsPlusClient.historyWindowSeconds = HISTORY_WINDOW_OPTIONS[i])
                 .controller(opt -> IntegerSliderControllerBuilder.create(opt).range(0, HISTORY_WINDOW_OPTIONS.length - 1).step(1).formatValue(i -> Component.literal(HISTORY_WINDOW_OPTIONS[i] + "s")))
-                .build())
-            .option(Option.<Integer>createBuilder()
+                .build());
+        engineBuilder.option(Option.<Integer>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus.pollingRate"))
                 .binding(100, () -> AccurateFpsPlusClient.pollingRate, v -> AccurateFpsPlusClient.pollingRate = v)
                 .controller(opt -> IntegerFieldControllerBuilder.create(opt).range(1, 5000))
-                .build())
-            .option(Option.<Integer>createBuilder()
+                .build());
+        engineBuilder.option(Option.<Integer>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus.mainUpdateInterval"))
                 .binding(250, () -> AccurateFpsPlusClient.mainUpdateInterval, v -> AccurateFpsPlusClient.mainUpdateInterval = v)
                 .controller(opt -> IntegerFieldControllerBuilder.create(opt).range(1, 3600000))
-                .build())
-            .option(Option.<Integer>createBuilder()
+                .build());
+        engineBuilder.option(Option.<Integer>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus.avrUpdateInterval"))
                 .binding(2000, () -> AccurateFpsPlusClient.avrUpdateInterval, v -> AccurateFpsPlusClient.avrUpdateInterval = v)
                 .controller(opt -> IntegerFieldControllerBuilder.create(opt).range(1, 3600000))
-                .build())
-            .option(Option.<Integer>createBuilder()
+                .build());
+        engineBuilder.option(Option.<Integer>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus.maxUpdateInterval"))
                 .binding(2000, () -> AccurateFpsPlusClient.maxUpdateInterval, v -> AccurateFpsPlusClient.maxUpdateInterval = v)
                 .controller(opt -> IntegerFieldControllerBuilder.create(opt).range(1, 3600000))
-                .build())
-            .option(Option.<Integer>createBuilder()
+                .build());
+        engineBuilder.option(Option.<Integer>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus.minUpdateInterval"))
                 .binding(2000, () -> AccurateFpsPlusClient.minUpdateInterval, v -> AccurateFpsPlusClient.minUpdateInterval = v)
                 .controller(opt -> IntegerFieldControllerBuilder.create(opt).range(1, 3600000))
-                .build())
-            .option(Option.<Integer>createBuilder()
+                .build());
+        engineBuilder.option(Option.<Integer>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus.onePercentLowUpdateInterval"))
                 .binding(2000, () -> AccurateFpsPlusClient.onePercentLowUpdateInterval, v -> AccurateFpsPlusClient.onePercentLowUpdateInterval = v)
                 .controller(opt -> IntegerFieldControllerBuilder.create(opt).range(1, 3600000))
-                .build())
-            .option(Option.<Integer>createBuilder()
+                .build());
+        engineBuilder.option(Option.<Integer>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus.zeroOnePercentLowUpdateInterval"))
                 .binding(2000, () -> AccurateFpsPlusClient.zeroOnePercentLowUpdateInterval, v -> AccurateFpsPlusClient.zeroOnePercentLowUpdateInterval = v)
                 .controller(opt -> IntegerFieldControllerBuilder.create(opt).range(1, 3600000))
-                .build())
-            .build();
+                .build());
+        ConfigCategory engineCategory = engineBuilder.build();
 
-        return builder
-            .category(generalCategory)
-            .category(metricsCategory)
-            .category(coloringCategory)
-            .category(engineCategory)
-            .build()
-            .generateScreen(parent);
+        builder.category(generalCategory).category(metricsCategory);
+        if (hasAutoColorMetric()) {
+            builder.category(coloringCategory);
+        }
+        builder.category(engineCategory);
+        return builder.build().generateScreen(parent);
     }
 
     private static OptionGroup createMetricGroup(
@@ -351,49 +388,64 @@ public class YaclConfigScreen {
         Consumer<Boolean> autoColorSet,
         Runnable markCustomVisibilityChanged
     ) {
-        return OptionGroup.createBuilder()
+        OptionGroup.Builder group = OptionGroup.createBuilder()
             .name(Component.translatable("category.accuratefpsplus." + subCategoryKey))
-            .collapsed(false)
-            .option(Option.<Boolean>createBuilder()
+            .collapsed(false);
+        group.option(Option.<Boolean>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus." + showKey))
                 .binding(showDefault, showGet::get, v -> {
                     showSet.accept(v);
                     markCustomVisibilityChanged.run();
                 })
                 .controller(TickBoxControllerBuilder::create)
-                .build())
-            .option(Option.<Integer>createBuilder()
+                .build());
+        if (!showGet.get()) {
+            return group.build();
+        }
+        group.option(Option.<Integer>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus." + posKey))
                 .binding(posDefault, posGet::get, posSet::accept)
                 .controller(opt -> IntegerSliderControllerBuilder.create(opt).range(1, posMax).step(1).formatValue(YaclConfigScreen::slotLabel))
-                .build())
-            .option(Option.<Integer>createBuilder()
+                .build());
+        group.option(Option.<Integer>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus." + precKey))
                 .binding(precDefault, precGet::get, precSet::accept)
                 .controller(opt -> IntegerSliderControllerBuilder.create(opt).range(0, 4).step(1))
-                .build())
-            .option(Option.<String>createBuilder()
+                .build());
+        group.option(Option.<String>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus." + beforeKey))
                 .binding(beforeDefault, () -> beforeGet.get() != null ? beforeGet.get() : beforeDefault, beforeSet::accept)
                 .controller(StringControllerBuilder::create)
-                .build())
-            .option(Option.<String>createBuilder()
+                .build());
+        group.option(Option.<String>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus." + afterKey))
                 .binding(afterDefault, () -> afterGet.get() != null ? afterGet.get() : afterDefault, afterSet::accept)
                 .controller(StringControllerBuilder::create)
-                .build())
-            .option(Option.<Color>createBuilder()
-                .name(Component.translatable("option.accuratefpsplus." + colorKey))
-                .binding(new Color(0xFFFFFF), () -> new Color(colorGet.get()), c -> colorSet.accept(c.getRGB() & 0xFFFFFF))
-                .controller(opt -> ColorControllerBuilder.create(opt).allowAlpha(false))
-                .build())
-            .option(Option.<Boolean>createBuilder()
+                .build());
+        group.option(Option.<Boolean>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus." + autoColorKey))
                 .description(OptionDescription.of(Component.translatable("tooltip.accuratefpsplus.autoColor")))
                 .binding(autoColorDefault, autoColorGet::get, autoColorSet::accept)
                 .controller(TickBoxControllerBuilder::create)
-                .build())
-            .build();
+                .build());
+        if (!autoColorGet.get()) {
+            group.option(Option.<Color>createBuilder()
+                .name(Component.translatable("option.accuratefpsplus." + colorKey))
+                .binding(new Color(0xFFFFFF), () -> new Color(colorGet.get()), c -> colorSet.accept(c.getRGB() & 0xFFFFFF))
+                .controller(opt -> ColorControllerBuilder.create(opt).allowAlpha(false))
+                .build());
+        }
+        return group.build();
+    }
+
+    private static boolean hasAutoColorMetric() {
+        return (AccurateFpsPlusClient.showFps && AccurateFpsPlusClient.fpsAutoColor)
+            || (AccurateFpsPlusClient.showFrametime && AccurateFpsPlusClient.frametimeAutoColor)
+            || (AccurateFpsPlusClient.showAvr && AccurateFpsPlusClient.avrAutoColor)
+            || (AccurateFpsPlusClient.showMax && AccurateFpsPlusClient.maxAutoColor)
+            || (AccurateFpsPlusClient.showMin && AccurateFpsPlusClient.minAutoColor)
+            || (AccurateFpsPlusClient.showOnePercentLow && AccurateFpsPlusClient.onePercentLowAutoColor)
+            || (AccurateFpsPlusClient.showZeroOnePercentLow && AccurateFpsPlusClient.zeroOnePercentLowAutoColor);
     }
 
     private static int historyWindowToIndex(int seconds) {
