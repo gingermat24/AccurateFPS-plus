@@ -3,20 +3,15 @@
 ## 1.3-r1 - 18/10/2026 (18:00 italian time)
 
 - Updated the NeoForge build targets to 21.1.263 for Minecraft 1.21.1 and 21.11.48 for Minecraft 1.21.11.
+- Updated Fabric Loom from 1.18.3 to 1.18.4 for both Fabric Minecraft targets.
 - Confirmed that the latest stable Sodium build for NeoForge 1.21.11 (0.8.14) crashes during chunk rendering with NeoForge 21.11.48; the failure is in Sodium's renderer, outside AccurateFPS+'s FPS-slider integration. The same issue was recorded with Sodium 0.8.14 / NeoForge 21.11.45 during 1.2-r2 testing, so this is not a new 1.3-r1 regression. Packaged-runtime compatibility remains unverified.
 - Verified the latest NeoForge 1.21.1 profile with Sodium, Cloth Config, and YACL, and NeoForge 1.21.11 with Cloth Config and YACL but without Sodium; both loaded and saved a world.
-- Updated Fabric Loom from 1.18.3 to 1.18.4 for both Fabric Minecraft targets.
 - Fixed invisible setting names in the NeoForge 1.21.11 native settings screen by drawing custom text with opaque colors; buttons display only their selected values.
-- Kept the NeoForge Mods-list settings screen as a native fallback when neither optional screen library is installed; Fabric configuration still requires Cloth Config or YACL.
-- Kept the unbound Open Configuration keybind on both loaders; Fabric Mod Menu entries require at least one supported screen library, while NeoForge always provides its Mods-list settings entry.
 - Routed the NeoForge Open Configuration keybind through the native fallback when neither optional screen library is installed.
-- Kept Cloth Config and YACL optional and independent; if both are installed, users can choose between them, with Cloth Config selected by default.
-- Preserved the saved screen preference when migrating existing configuration files.
 - Hide the Settings Screen selector unless both screen libraries are installed; route Mod Menu, NeoForge, and the keybind through the same saved preference.
+- Preserved the saved screen preference when migrating existing configuration files.
 - Added a persistent HUD Size slider from 1% to 200% (100% default), scaling both HUD lines, layout, anchor clamping, and the background overlay.
 - Made both optional settings screens contextual: hide custom coordinates, inactive metric details, and unused overlay/coloring controls; Engine tuning settings remain visible regardless of enabled metrics.
-- Kept third-party UI libraries optional and unembedded.
-- Aligned Fabric keybind categories with their NeoForge counterparts.
 - Pause telemetry while the HUD is disabled, a screen is open, or Hide with F3 is active; reset the frame-time and polling baseline on resume.
 - Discard active frame gaps of 1 second or longer so suspends and long interruptions do not become FPS, frametime, rolling-statistic, or percentile samples.
 - Calculate 1% Low and 0.1% Low from per-rendered-frame FPS observations using nearest-rank selection over the configured history window; small histories can still produce equal values when their selected ranks coincide.
