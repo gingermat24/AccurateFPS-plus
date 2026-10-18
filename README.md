@@ -38,8 +38,7 @@ All four target builds provide the same player-facing HUD, metrics, settings, pr
 | :--- | :---: | :---: |
 | `1.3-r1` **(Latest)** | **1.21.1, 1.21.11** | Fabric, NeoForge |
 | `1.2-r2` | 1.21.1, 1.21.11 | Fabric, NeoForge |
-| `1.2-r1` | 1.21.1, 1.21.11 | Fabric |
-| `1.1-r1` | 1.21.1, 1.21.11 | Fabric |
+| `1.2-r1` `1.1-r1` | 1.21.1, 1.21.11 | Fabric |
 | `1.0-r2 Refabricated` | 1.21.11 | Fabric |
 | `1.0-r1` | 1.21.1, 1.21.11 | Fabric, Forge, Quilt |
 

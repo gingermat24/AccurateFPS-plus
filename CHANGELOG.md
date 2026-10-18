@@ -6,6 +6,7 @@
 - Fixed invisible setting names in the NeoForge 1.21.11 native settings screen by drawing custom text with opaque colors; buttons display only their selected values.
 - Kept the NeoForge Mods-list settings screen as a native fallback when neither optional screen library is installed; Fabric configuration still requires Cloth Config or YACL.
 - Kept the unbound Open Configuration keybind on both loaders; Fabric Mod Menu entries require at least one supported screen library, while NeoForge always provides its Mods-list settings entry.
+- Routed the NeoForge Open Configuration keybind through the native fallback when neither optional screen library is installed.
 - Kept Cloth Config and YACL optional and independent; if both are installed, users can choose between them, with Cloth Config selected by default.
 - Preserved the saved screen preference when migrating existing configuration files.
 - Hide the Settings Screen selector unless both screen libraries are installed; route Mod Menu, NeoForge, and the keybind through the same saved preference.
