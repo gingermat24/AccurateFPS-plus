@@ -150,7 +150,7 @@ public class AccurateFpsPlusClient {
         }
         while (openConfigKey != null && openConfigKey.consumeClick()) {
             if (client.screen == null) {
-                client.setScreen(ConfigScreenRouter.create(null));
+                client.setScreen(AccurateFpsPlusPlatform.createConfigScreen(null));
             }
         }
         if (isTelemetryInactive(client)) {

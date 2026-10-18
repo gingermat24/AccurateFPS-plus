@@ -1,8 +1,7 @@
 package com.accuratefpsplus.neoforge;
 
 import com.accuratefpsplus.AccurateFpsPlusClient;
-import com.accuratefpsplus.ConfigScreenRouter;
-import com.accuratefpsplus.NativeConfigScreen;
+import com.accuratefpsplus.AccurateFpsPlusPlatform;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -71,7 +70,6 @@ final class NeoForgeClientEvents {
     }
 
     private static Screen createConfigScreen(ModContainer container, Screen parent) {
-        Screen optionalScreen = ConfigScreenRouter.createPreferred(parent);
-        return optionalScreen != null ? optionalScreen : NativeConfigScreen.create(parent);
+        return AccurateFpsPlusPlatform.createConfigScreen(parent);
     }
 }
