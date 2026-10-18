@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.3-r1 - Unreleased
+## 1.3-r1 - 18/10/2026 (18:00 italian time)
 
 - Updated the NeoForge build targets to 21.1.263 for Minecraft 1.21.1 and 21.11.48 for Minecraft 1.21.11.
 - Confirmed that the latest stable Sodium build for NeoForge 1.21.11 (0.8.14) crashes during chunk rendering with NeoForge 21.11.48; the failure is in Sodium's renderer, outside AccurateFPS+'s FPS-slider integration. The same issue was recorded with Sodium 0.8.14 / NeoForge 21.11.45 during 1.2-r2 testing, so this is not a new 1.3-r1 regression. Packaged-runtime compatibility remains unverified.
