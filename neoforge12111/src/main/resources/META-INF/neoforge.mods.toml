@@ -38,13 +38,6 @@ versionRange="[${yacl_min_version},)"
 ordering="AFTER"
 side="CLIENT"
 
-[[dependencies.accuratefpsplus]]
-modId="sodium"
-type="optional"
-versionRange="[${sodium_min_version},)"
-ordering="AFTER"
-side="CLIENT"
-
 [[mixins]]
 config="accuratefpsplus.client.mixins.json"
 

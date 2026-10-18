@@ -22,7 +22,7 @@ A lightweight, client-side **FPS HUD** mod with an **extended framerate slider**
 * **Client API** - Companion mods can read current telemetry through `com.accuratefpsplus.api.AccurateFpsApi`.
 * **Conflict Avoidance** - The framerate slider integration is skipped when specific known FPS-cap or textbox mod IDs are present; this avoids replacing those controls but does not guarantee compatibility with every FPS mod.
 
-All four target builds provide the same player-facing HUD, metrics, settings, presets, keybinds, FPS slider, and optional Sodium integration. Loader entrypoints, game APIs, and dependency builds differ where required for Fabric, NeoForge, or the Minecraft version.
+All four target builds provide the same HUD, metrics, settings, presets, keybinds, and FPS slider. Sodium's FPS-slider integration is available on Fabric and NeoForge 1.21.1. See the compatibility notes below for NeoForge 1.21.11.
 
   ![preview of the All Metrics preset](https://cdn.modrinth.com/data/cached_images/14a662614a47160304e1bd56a96e22dd3d15b1ec.gif)
   > "_All Metrics_" preset + _Fixed Auto-Coloring_ (before dynamic gradient) - **v1.0-r1**
@@ -105,13 +105,13 @@ Use **Cycle HUD Preset** in the Controls menu to rotate **Minimal → Competitiv
 - **Time-windowed telemetry history** - Retains frame samples within the configured history and required statistic refresh windows.
 - **Frame-based low percentiles** - Uses valid render-frame intervals rather than polling-window samples, so short frame drops are represented in the low metrics.
 - **Reusable percentile workspace** - Stores frame history in a time-windowed primitive ring and reuses its Quickselect workspace.
-- **Cached HUD text** - Text composition is skipped when telemetry values and configuration have not changed.
-- **Cached overlay color and dimensions** - Reuses calculated overlay color and render dimensions.
-- **Low-percentile selection** - Uses Quickselect with a median-of-three pivot instead of fully sorting the sample window.
+- **Cached HUD text** - Skips text composition when telemetry values and configuration have not changed.
+- **Cached overlay rendering data** - Reuses calculated overlay colors and dimensions.
+- **Low-percentile selection** - Uses Quickselect with a median-of-three pivot rather than sorting the full sample window.
 - **Shared range-statistics pass** - Calculates due AVG, MAX, and MIN values together when any of their refresh deadlines is reached.
-- **Automatic config migration** - Upgrades supported older settings formats when loading the configuration.
+- **Configuration migration** - Migrates supported older settings formats when loading the configuration.
 
-These describe implementation choices. Synthetic engine profiling is not an in-game FPS benchmark and does not claim a gameplay performance gain.
+Synthetic engine-only stress profile (1,000 FPS, 60-second history, 1 ms statistic and percentile refresh intervals, 3 simulated seconds): elapsed time fell from 100.4 ms to 11.5 ms (about 88.5% lower), and allocation fell from 72.4 MB to 333 KB (about 99.5% lower). This is a synthetic engine-only measurement, not an in-game benchmark; it does not establish a gameplay performance gain.
 
 ---
 
@@ -123,16 +123,12 @@ These describe implementation choices. Synthetic engine profiling is not an in-g
 | [Cloth Config](https://modrinth.com/mod/cloth-config) | ⚙️ **Optional** |
 | [YetAnotherConfigLib (YACL)](https://modrinth.com/mod/yacl) | ⚙️ **Optional** |
 | [Mod Menu](https://modrinth.com/mod/modmenu) | ⚙️ **Optional (FABRIC)** |
-| [Sodium](https://modrinth.com/mod/sodium) | ✅ **Optional compatibility** |
-| [Sodium FPS Cap Fix](https://modrinth.com/mod/sodiumfpscapfix) | ✅ **Optional compatibility** |
+| [Sodium](https://modrinth.com/mod/sodium) | ✅ **Optional (except NeoForge 1.21.11)** |
+| [Sodium FPS Cap Fix](https://modrinth.com/mod/sodiumfpscapfix) | ✅ **Optional** |
 
-The Cloth Config and YACL screens show only controls relevant to the current saved settings: custom coordinates only for the custom anchor, overlay color/transparency only when the overlay is enabled, per-metric details only for enabled metrics, and coloring/telemetry controls only when their related metrics and modes are active. Dependent controls refresh when the settings screen is reopened after changing their enabling option.
+Minecraft and the selected loader are required. Cloth Config and YACL are independent, optional settings-screen choices. NeoForge also provides its own settings screen, so neither library is required there. Settings are saved in `config/accuratefpsplus.json`; the extended FPS limit is saved in `config/accuratefpsplus-fps.json`.
 
-**Dependency status:** Minecraft and the selected loader are required; Fabric API is required on Fabric. Cloth Config and YACL are optional alternative settings-screen libraries. Mod Menu is a separate optional Fabric mod-list entry point, not a settings-screen library; it opens the selected optional screen when available and does not require Cloth Config. Mod Menu's published Fabric versions declare Fabric API and Text Placeholder API as their dependencies, not Cloth Config. Sodium is optional for its FPS slider integration; Sodium FPS Cap Fix is recognized for FPS-slider conflict avoidance. **Embedded dependencies: none.** Settings are also stored in `config/accuratefpsplus.json`; the custom framerate limit is stored separately in `config/accuratefpsplus-fps.json`.
-
-Optional mods and rendering combinations are not all tested together. Compatibility can depend on the exact Minecraft version and mod versions.
-
-The NeoForge 1.21.11 development-client smoke test with Sodium 0.8.14 reached a world but then hit a `ValidationGpuTexture` to `GlTexture` cast failure inside Sodium's chunk renderer. AccurateFPS+ only changes Sodium's FPS controls, but this combination has not been isolated in a packaged runtime and is not claimed as verified.
+**NeoForge 1.21.11:** Sodium is not supported with this loader/version combination in 1.3-r1. The latest stable Sodium release for this target, 0.8.14, crashes during world rendering with NeoForge 21.11.48 (and also did so with NeoForge 21.11.45). The error is a `ValidationGpuTexture` to `GlTexture` cast in Sodium's chunk renderer. AccurateFPS+'s Sodium integration only changes FPS-slider controls; it does not modify chunk rendering. These tests used development clients, so whether the same crash occurs with a packaged release has not been confirmed. Without Sodium, the latest NeoForge 1.21.11 test loaded and saved a world. The latest NeoForge 1.21.1 profile with Sodium, Cloth Config, and YACL also loaded and saved a world.
 
 ---
 
