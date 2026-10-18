@@ -2,6 +2,9 @@
 
 ## 1.3-r1 - Unreleased
 
+- Updated the NeoForge build targets to 21.1.263 for Minecraft 1.21.1 and 21.11.48 for Minecraft 1.21.11.
+- Confirmed that the latest stable Sodium build for NeoForge 1.21.11 (0.8.14) crashes during chunk rendering with NeoForge 21.11.48; the failure is in Sodium's renderer, outside AccurateFPS+'s FPS-slider integration. The same issue was recorded with Sodium 0.8.14 / NeoForge 21.11.45 during 1.2-r2 testing, so this is not a new 1.3-r1 regression. Packaged-runtime compatibility remains unverified.
+- Verified the latest NeoForge 1.21.1 profile with Sodium, Cloth Config, and YACL, and NeoForge 1.21.11 with Cloth Config and YACL but without Sodium; both loaded and saved a world.
 - Updated Fabric Loom from 1.18.3 to 1.18.4 for both Fabric Minecraft targets.
 - Fixed invisible setting names in the NeoForge 1.21.11 native settings screen by drawing custom text with opaque colors; buttons display only their selected values.
 - Kept the NeoForge Mods-list settings screen as a native fallback when neither optional screen library is installed; Fabric configuration still requires Cloth Config or YACL.
@@ -25,6 +28,7 @@
 
 - Added separate NeoForge release jars for Minecraft 1.21.1 and 1.21.11, while retaining the existing Fabric jars and the `1.2-r2` version.
 - Ported the HUD, all seven telemetry metrics, settings, presets, keybinds, F3 behavior, precise FPS slider, and optional Sodium slider integration to NeoForge.
+- Compatibility note: development testing with Sodium 0.8.14 and NeoForge 21.11.45 reached a world before failing in Sodium's chunk renderer. This limitation predates 1.3-r1.
 - Added a NeoForge Mods-list settings button with a built-in configuration screen when neither optional UI library is installed; Cloth Config and YACL screens remain supported when available.
 - Added an unbound-by-default keybind to cycle through the Minimal, Competitive, and Detailed HUD presets in-game; preset changes are saved immediately.
 - Enabled Hide with F3 by default for new installations while preserving existing saved preferences.

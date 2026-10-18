@@ -82,8 +82,7 @@ processResources {
         minecraft_version: project.minecraft_version,
         neoforge_version: project.neoforge_version,
         cloth_config_min_version: project.cloth_config_min_version,
-        yacl_min_version: project.yacl_min_version,
-        sodium_min_version: project.sodium_min_version
+        yacl_min_version: project.yacl_min_version
     ]
     inputs.properties(metadata)
     filesMatching("META-INF/neoforge.mods.toml") {
