@@ -11,6 +11,7 @@ public final class AccurateFpsPlusFabricClient implements ClientModInitializer {
     @Override
     @SuppressWarnings("deprecation")
     public void onInitializeClient() {
+        AccurateFpsPlusClient.registerKeyCategory();
         AccurateFpsPlusClient.initialize(FabricLoader.getInstance().getConfigDir());
 
         KeyMapping toggleKey = AccurateFpsPlusClient.createToggleKeyMapping();

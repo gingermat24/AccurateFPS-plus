@@ -1,0 +1,111 @@
+repositories {
+	mavenCentral()
+	maven { url = 'https://maven.fabricmc.net/' }
+	maven { url = 'https://maven.terraformersmc.com/releases' }
+	maven { url = 'https://maven.shedaniel.me/' }
+	maven { url = 'https://api.modrinth.com/maven' }
+	maven { url = 'https://maven.isxander.dev/releases' }
+	maven { url = 'https://maven.quiltmc.org/repository/release/' }
+}
+
+loom {
+	splitEnvironmentSourceSets()
+
+	mods {
+		accuratefpsplus {
+			sourceSet sourceSets.main
+			sourceSet sourceSets.client
+		}
+	}
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	compileOnly "maven.modrinth:cloth-config:${project.cloth_config_version}"
+	compileOnly "me.shedaniel.cloth:basic-math:0.6.1"
+	compileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
+	compileOnly "maven.modrinth:sodium:${project.sodium_version}"
+	compileOnly "maven.modrinth:yacl:${project.yacl_version}"
+
+	if (project.hasProperty("smokeCloth")) {
+		runtimeOnly "maven.modrinth:cloth-config:${project.cloth_config_version}"
+	}
+	if (project.hasProperty("smokeModMenu")) {
+		runtimeOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
+	}
+	if (project.hasProperty("smokeSodium")) {
+		runtimeOnly "maven.modrinth:sodium:${project.sodium_version}"
+	}
+	if (project.hasProperty("smokeYacl")) {
+		runtimeOnly "maven.modrinth:yacl:${project.yacl_version}"
+		runtimeOnly "org.quiltmc.parsers:gson:0.2.1"
+	}
+
+	testImplementation platform("org.junit:junit-bom:6.1.3")
+	testImplementation "org.junit.jupiter:junit-jupiter"
+	testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+sourceSets.client.java.srcDir("../mc26/src/client/java")
+sourceSets.client.java.srcDir("../mcCompat/${project.minecraft_compat}/java")
+sourceSets.client.resources.srcDir("../mcCompat/${project.minecraft_compat}/resources")
+if (project.minecraft_compat == "26.1") {
+	sourceSets.client.java.exclude("**/HudExtractRenderStateMixin.java")
+}
+sourceSets.client.java.srcDir("../shared/src/client/java")
+sourceSets.client.java.srcDir("../fabric-platform/src/client/java")
+sourceSets.client.resources.srcDir("../src/main/resources")
+sourceSets.main.resources.setSrcDirs(["../fabric26/src/main/resources"])
+sourceSets.test.java.srcDirs("../shared/src/client/java", "../shared/src/test/java")
+sourceSets.test.java.exclude("com/accuratefpsplus/ConfigScreenRouter.java")
+
+sourceSets.client.resources.exclude(
+	"fabric.mod.json",
+	"accuratefpsplus.accesswidener",
+	"accuratefpsplus.client.mixins.json",
+	"accuratefpsplus.sodium.mixins.json"
+)
+
+tasks.withType(Test).configureEach {
+	useJUnitPlatform()
+}
+
+tasks.withType(JavaCompile).configureEach {
+	options.release = 25
+}
+
+processResources {
+	def metadata = [
+		version: project.version,
+		minecraft_version: project.minecraft_version,
+		minecraft_version_constraint: project.minecraft_version_constraint,
+		loader_version: project.loader_version,
+		client_mixin_config: project.client_mixin_config
+	]
+	inputs.properties(metadata)
+	filesMatching("fabric.mod.json") {
+		expand(metadata)
+	}
+}
+
+java {
+	toolchain.languageVersion = JavaLanguageVersion.of(25)
+	withSourcesJar()
+}
+
+base {
+	archivesName = "accuratefpsplus-${project.minecraft_version}"
+}
+
+tasks.named("jar") {
+	archiveClassifier = "fabric"
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+	from("../LICENSE") {
+		rename { "${it}_accuratefpsplus" }
+	}
+}
+
+tasks.named("sourcesJar") {
+	archiveClassifier = "fabric-sources"
+}

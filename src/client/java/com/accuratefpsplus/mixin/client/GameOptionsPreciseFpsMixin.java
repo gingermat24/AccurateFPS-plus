@@ -38,6 +38,10 @@ public abstract class GameOptionsPreciseFpsMixin {
     @Unique
     private static final int AFPS_MAX = 1000;
     @Unique
+    private static final int AFPS_UNLIMITED = AFPS_MAX + 1;
+    @Unique
+    private static final int AFPS_UNLIMITED_VALUE = 260;
+    @Unique
     private static final int AFPS_DEFAULT = 120;
     @Unique
     private static final String AFPS_KEY = "customMaxFps";
@@ -62,7 +66,7 @@ public abstract class GameOptionsPreciseFpsMixin {
         accuratefpsplus$installMaxFpsOption();
         int saved = GameOptionsPreciseFpsMixin.accuratefpsplus$readOurFps();
         if (client != null && client.getFramerateLimitTracker() != null) {
-            client.getFramerateLimitTracker().setFramerateLimit(saved);
+            client.getFramerateLimitTracker().setFramerateLimit(accuratefpsplus$toFramerateLimit(saved));
         }
     }
 
@@ -77,17 +81,22 @@ public abstract class GameOptionsPreciseFpsMixin {
     private void accuratefpsplus$installMaxFpsOption() {
         int saved = GameOptionsPreciseFpsMixin.accuratefpsplus$readOurFps();
         this.framerateLimit = new OptionInstance<>("options.framerateLimit", OptionInstance.noTooltip(), (caption, value) -> {
-            if (value >= AFPS_MAX) {
+            if (value > AFPS_MAX) {
                 return Options.genericValueLabel((Component)caption, (Component)Component.translatable((String)"options.framerateLimit.max"));
             }
             return Options.genericValueLabel((Component)caption, (Component)Component.translatable((String)"options.framerate", (Object[])new Object[]{value}));
-        }, new OptionInstance.IntRange(AFPS_MIN, AFPS_MAX), saved, value -> {
+        }, new OptionInstance.IntRange(AFPS_MIN, AFPS_UNLIMITED), saved, value -> {
             Minecraft mc = Minecraft.getInstance();
             if (mc != null && mc.getFramerateLimitTracker() != null) {
-                mc.getFramerateLimitTracker().setFramerateLimit(value);
+                mc.getFramerateLimitTracker().setFramerateLimit(accuratefpsplus$toFramerateLimit(value));
             }
             GameOptionsPreciseFpsMixin.accuratefpsplus$writeOurFps(value);
         });
+    }
+
+    @Unique
+    private static int accuratefpsplus$toFramerateLimit(int value) {
+        return value == AFPS_UNLIMITED ? AFPS_UNLIMITED_VALUE : value;
     }
 
     @Inject(method={"load"}, at={@At(value="TAIL")})
@@ -99,7 +108,7 @@ public abstract class GameOptionsPreciseFpsMixin {
         this.framerateLimit.set(saved);
         Minecraft mc = Minecraft.getInstance();
         if (mc != null && mc.getFramerateLimitTracker() != null) {
-            mc.getFramerateLimitTracker().setFramerateLimit(saved);
+            mc.getFramerateLimitTracker().setFramerateLimit(accuratefpsplus$toFramerateLimit(saved));
         }
     }
 
@@ -129,7 +138,7 @@ public abstract class GameOptionsPreciseFpsMixin {
                     ACCURATEFPSPLUS_LOGGER.warn("Invalid '{}' value in {}; using {} FPS.", AFPS_KEY, path, AFPS_DEFAULT);
                     return AFPS_DEFAULT;
                 }
-                return Mth.clamp(value.getAsInt(), AFPS_MIN, AFPS_MAX);
+                return Mth.clamp(value.getAsInt(), AFPS_MIN, AFPS_UNLIMITED);
             }
         } catch (IOException | JsonParseException | IllegalStateException exception) {
             ACCURATEFPSPLUS_LOGGER.warn("Could not read FPS limit config at {}; using {} FPS.", path, AFPS_DEFAULT, exception);

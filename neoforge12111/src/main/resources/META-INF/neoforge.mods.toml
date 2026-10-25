@@ -7,7 +7,7 @@ modId="accuratefpsplus"
 version="${mod_version}"
 displayName="AccurateFPS+"
 authors="gingermat"
-description='''Lightweight, configurable performance HUD with precise FPS, AVG, MAX, and MIN telemetry.'''
+description='''Lightweight performance HUD with FPS, frametime, and rolling-statistic telemetry.'''
 displayTest="IGNORE_ALL_VERSION"
 
 [[dependencies.accuratefpsplus]]
@@ -20,7 +20,7 @@ side="CLIENT"
 [[dependencies.accuratefpsplus]]
 modId="minecraft"
 type="required"
-versionRange="[${minecraft_version}]"
+versionRange="${minecraft_version_range}"
 ordering="NONE"
 side="CLIENT"
 

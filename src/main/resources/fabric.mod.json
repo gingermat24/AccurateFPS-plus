@@ -3,7 +3,7 @@
 	"id": "accuratefpsplus",
 	"version": "${version}",
 	"name": "AccurateFPS+",
-	"description": "Lightweight, configurable performance HUD with precise FPS, AVG, MAX, and MIN telemetry.",
+	"description": "Lightweight performance HUD with FPS, frametime, and rolling-statistic telemetry.",
 	"authors": [
 		"gingermat"
 	],

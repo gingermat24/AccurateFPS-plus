@@ -388,14 +388,17 @@ public class YaclConfigScreen {
         Consumer<Boolean> autoColorSet,
         Runnable markCustomVisibilityChanged
     ) {
+        boolean initialVisibility = showGet.get();
         OptionGroup.Builder group = OptionGroup.createBuilder()
             .name(Component.translatable("category.accuratefpsplus." + subCategoryKey))
             .collapsed(false);
         group.option(Option.<Boolean>createBuilder()
                 .name(Component.translatable("option.accuratefpsplus." + showKey))
                 .binding(showDefault, showGet::get, v -> {
+                    if (v != initialVisibility) {
+                        markCustomVisibilityChanged.run();
+                    }
                     showSet.accept(v);
-                    markCustomVisibilityChanged.run();
                 })
                 .controller(TickBoxControllerBuilder::create)
                 .build());

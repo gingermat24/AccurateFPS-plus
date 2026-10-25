@@ -7,8 +7,8 @@ A lightweight, client-side **FPS HUD** mod with an **extended framerate slider**
 ## Highlights
 
 * **7 Performance Metrics** - Track **Live FPS, Frametime, AVG, MAX, MIN, 1% Low, and 0.1% Low** to see current performance and framerate stability in detail.
-* **1% & 0.1% Lows** - Monitor lower-end framerate to identify performance drops that average FPS can hide. Low percentiles use nearest-rank selection over valid per-frame FPS values in the configured history window.
-* **Extended FPS Slider** - When no recognized conflicting FPS-cap or textbox mod is installed, AccurateFPS+ replaces the vanilla framerate limit slider with a precise **1–1000 FPS** range and 1 FPS increments. The selected limit persists in its own config file.
+* **1% & 0.1% Lows** - Calculate low-percentile FPS from valid per-frame observations within the selected history window, revealing slow frames that an average can hide.
+* **Extended FPS Slider** - When no recognized conflicting FPS-cap or textbox mod is installed, AccurateFPS+ replaces the vanilla framerate limit slider with a precise **1–1000 FPS** range, followed by **Unlimited**, in 1 FPS increments. The selected limit persists in its own config file.
 * **Flexible FPS Calculation** - Choose between **Real-Time**, **Averaged**, or **EMA** (exponential moving average) calculation modes.
 * **FPS History & Statistics** - Configure the history window used for AVG and low-percentile calculations from **1s to 60s**. MAX and MIN are also calculated from retained samples.
 * **Measured Frametime** - Display the measured frame duration in milliseconds alongside the FPS metrics.
@@ -18,17 +18,15 @@ A lightweight, client-side **FPS HUD** mod with an **extended framerate slider**
 * **HUD Size** - Scale the complete HUD from **1% to 200%**; default is **100%**.
 * **Presets** - Quickly switch between **Minimal, Competitive, Detailed, and Custom** HUD layouts.
 * **Preset Cycle Keybind** - Cycle through Minimal, Competitive, and Detailed presets in-game; the keybind starts unbound to avoid conflicts with other mods.
-* **In-Game Settings** - Cloth Config and YACL provide optional settings screens. On Fabric, the unbound-by-default **Open Configuration** keybind is available when at least one is installed; the Mod Menu entry is also available when Mod Menu is installed. NeoForge always has a Mods-list entry and native fallback screen; when Cloth Config or YACL is installed, it uses the selected optional screen instead. If both are installed, choose between them in General settings; Cloth Config is the default.
+* **In-Game Settings** - Cloth Config and YACL provide optional settings screens. On Fabric, the unbound-by-default **Open Configuration** keybind is available when at least one is installed; the Mod Menu entry is also available when Mod Menu is installed. NeoForge always has a Mods-list entry and a complete native settings screen; when Cloth Config or YACL is installed, it can use the selected optional screen instead. If both are installed, choose between them in General settings; Cloth Config is the default.
 * **Client API** - Companion mods can read current telemetry through `com.accuratefpsplus.api.AccurateFpsApi`.
 * **Conflict Avoidance** - The framerate slider integration is skipped when specific known FPS-cap or textbox mod IDs are present; this avoids replacing those controls but does not guarantee compatibility with every FPS mod.
-
-All four target builds provide the same HUD, metrics, settings, presets, keybinds, and FPS slider. Sodium's FPS-slider integration is available on Fabric and NeoForge 1.21.1. See the compatibility notes below for NeoForge 1.21.11.
 
   ![preview of the All Metrics preset](https://cdn.modrinth.com/data/cached_images/14a662614a47160304e1bd56a96e22dd3d15b1ec.gif)
   > "_All Metrics_" preset + _Fixed Auto-Coloring_ (before dynamic gradient) - **v1.0-r1**
 
   ![All  7 Metrics](https://cdn.modrinth.com/data/cached_images/8ff9e851312c58caf3633ba5ee912959c4eb9d73_0.webp)
-  > "_All Metrics_" preset + Dynamic Coloring on FPS - **v1.2-r1**
+  > "_All Metrics_" preset + Dynamic Coloring on FPS - **v1.2-r1+**
 
 ---
 
@@ -36,8 +34,11 @@ All four target builds provide the same HUD, metrics, settings, presets, keybind
 
 | Release | Minecraft | Loader |
 | :--- | :---: | :---: |
-| `1.3-r1` **(Latest)** | **1.21.1, 1.21.11** | Fabric, NeoForge |
-| `1.2-r2` | 1.21.1, 1.21.11 | Fabric, NeoForge |
+| `1.4-r1` **(Latest)** | **1.21.1, 1.21.11** | Fabric, NeoForge |
+|                          | **26.1.x** | Fabric |
+|                          | **26.1.x** | NeoForge |
+|                          | **26.2, 26.3** | Fabric, NeoForge |
+| `1.2-r2` `1.3-r1` | 1.21.1, 1.21.11 | Fabric, NeoForge |
 | `1.2-r1` `1.1-r1` | 1.21.1, 1.21.11 | Fabric |
 | `1.0-r2 Refabricated` | 1.21.11 | Fabric |
 | `1.0-r1` | 1.21.1, 1.21.11 | Fabric, Forge, Quilt |
@@ -47,7 +48,7 @@ All four target builds provide the same HUD, metrics, settings, presets, keybind
 ## Configuration
 
 <details>
-<summary>Settings are grouped into up to 4 contextual categories; controls that do not apply are hidden. Engine tuning settings remain available even when their related metrics are disabled. Save changes in the configuration screen; a game restart is not required:</summary>
+<summary>Settings are grouped into up to 4 categories. Engine tuning remains available even when related metrics are disabled. Save changes in the configuration screen; a game restart is not required:</summary>
 
 ### 1. General
 - **Enable HUD** - Toggle HUD visibility.
@@ -58,7 +59,7 @@ All four target builds provide the same HUD, metrics, settings, presets, keybind
 - **X & Y Offsets** - Fine-tune the HUD position.
 - **Text Shadow** - Toggle text drop shadow.
 - **HUD Size** - Scale all HUD text and the background overlay from 1% to 200% (100% by default).
-- **Settings Screen** - Cloth Config and YACL are optional, independent settings-screen libraries. If both are installed, choose between them in General settings; Cloth Config is selected by default. If only one is installed, AccurateFPS+ uses it without showing a redundant selector. With neither installed, Fabric has no settings entry or configuration keybind; NeoForge retains its Mods-list entry, native configuration screen, and configuration keybind.
+- **Settings Screen** - Cloth Config and YACL are optional. NeoForge always provides a native settings screen through its Mods-list entry and configuration keybind; either optional library can be used instead. If both libraries are installed, choose one in General settings.
 - **Background Overlay** - Optional background box with customizable color and transparency.
 
 ### 2. Metrics
@@ -71,7 +72,7 @@ Organized into 7 metric groups:
 - **1% Low** - Nearest-rank low-percentile FPS over valid active render-frame samples.
 - **0.1% Low** - Nearest-rank low-percentile FPS over valid active render-frame samples.
 
-Percentiles use one observation per rendered frame, independently of the Engine polling interval. Each low reports the nearest-rank percentile FPS sample; it is not the average FPS of the slowest 1% or 0.1% of frames. Inactive periods (HUD disabled, a screen open, or F3 hiding the HUD) pause sampling. Active frame gaps of 1 second or longer are treated as interruptions and discarded. The two low-percentile values can still match when nearest-rank selects the same frame rank or when the corresponding frame rates are equal.
+Low-percentile values use nearest-rank selection across valid rendered-frame samples in the selected history window; they are percentiles, not the average FPS of the slowest frames. Sampling pauses while the HUD is disabled, a screen is open, or F3 is hiding the HUD. Frame gaps of one second or longer are discarded as interruptions, so the 1% and 0.1% values can match when they select the same rank or FPS value.
 
 Each metric can be configured with:
 - Visibility toggle
@@ -117,18 +118,22 @@ Synthetic engine-only stress profile (1,000 FPS, 60-second history, 1 ms statist
 
 ## Dependencies & Compatibility
 
-| Mod | Status |
-| ------------------------------------------------------------------------- | ------------------------------------------- |
-| [Fabric API](https://modrinth.com/mod/fabric-api) | 📦 **Required (FABRIC)** |
-| [Cloth Config](https://modrinth.com/mod/cloth-config) | ⚙️ **Optional** |
-| [YetAnotherConfigLib (YACL)](https://modrinth.com/mod/yacl) | ⚙️ **Optional** |
-| [Mod Menu](https://modrinth.com/mod/modmenu) | ⚙️ **Optional (FABRIC)** |
-| [Sodium](https://modrinth.com/mod/sodium) | ✅ **Optional (except NeoForge 1.21.11)** |
-| [Sodium FPS Cap Fix](https://modrinth.com/mod/sodiumfpscapfix) | ✅ **Optional** |
+| Version                  | Loader   | 📦 Required                                      | ⚙️ Optional                                                                 | ✅ Compatible                                                                 |
+|--------------------------|----------|--------------------------------------------------|-----------------------------------------------------------------------------|-------------------------------------------------------------------------------|
+| **1.21.1**               | Fabric   | [Fabric API](https://modrinth.com/mod/fabric-api) | [Cloth Config](https://modrinth.com/mod/cloth-config), [YACL](https://modrinth.com/mod/yacl), [Mod Menu](https://modrinth.com/mod/modmenu) | [Sodium](https://modrinth.com/mod/sodium), [Sodium FPS Cap Fix](https://modrinth.com/mod/sodiumfpscapfix) |
+|                          | NeoForge | /                                                | [Cloth Config](https://modrinth.com/mod/cloth-config), [YACL](https://modrinth.com/mod/yacl) | [Sodium](https://modrinth.com/mod/sodium)                                     |
+| **1.21.11**              | Fabric   | [Fabric API](https://modrinth.com/mod/fabric-api) | [Cloth Config](https://modrinth.com/mod/cloth-config), [YACL](https://modrinth.com/mod/yacl), [Mod Menu](https://modrinth.com/mod/modmenu) | [Sodium](https://modrinth.com/mod/sodium), [Sodium FPS Cap Fix](https://modrinth.com/mod/sodiumfpscapfix) |
+|                          | NeoForge | /                                                | [Cloth Config](https://modrinth.com/mod/cloth-config), [YACL](https://modrinth.com/mod/yacl) | /                                                                             |
+| **26.1.x**              | Fabric   | /                                                | [Cloth Config](https://modrinth.com/mod/cloth-config), [YACL](https://modrinth.com/mod/yacl), [Mod Menu](https://modrinth.com/mod/modmenu) | [Sodium](https://modrinth.com/mod/sodium), [Sodium FPS Cap Fix](https://modrinth.com/mod/sodiumfpscapfix) |
+| **26.1.2**              | NeoForge | /                                                | [Cloth Config](https://modrinth.com/mod/cloth-config), [YACL](https://modrinth.com/mod/yacl) | [Sodium](https://modrinth.com/mod/sodium)                                     |
+| **26.2 / 26.3**         | Fabric   | /                                                | [Cloth Config](https://modrinth.com/mod/cloth-config), [YACL](https://modrinth.com/mod/yacl), [Mod Menu](https://modrinth.com/mod/modmenu) | [Sodium](https://modrinth.com/mod/sodium), [Sodium FPS Cap Fix](https://modrinth.com/mod/sodiumfpscapfix) |
+|                          | NeoForge | /                                                | [Cloth Config](https://modrinth.com/mod/cloth-config), [YACL](https://modrinth.com/mod/yacl) | [Sodium](https://modrinth.com/mod/sodium)                                     |
 
-Minecraft and the selected loader are required. Cloth Config and YACL are independent, optional settings-screen choices. NeoForge also provides its own settings screen, so neither library is required there. Settings are saved in `config/accuratefpsplus.json`; the extended FPS limit is saved in `config/accuratefpsplus-fps.json`.
+Settings are saved in `config/accuratefpsplus.json`; the extended FPS limit is saved in `config/accuratefpsplus-fps.json`.
 
-**NeoForge 1.21.11:** Sodium is not supported with this loader/version combination in 1.3-r1. The latest stable Sodium release for this target, 0.8.14, crashes during world rendering with NeoForge 21.11.48 (and also did so with NeoForge 21.11.45). The error is a `ValidationGpuTexture` to `GlTexture` cast in Sodium's chunk renderer. AccurateFPS+'s Sodium integration only changes FPS-slider controls; it does not modify chunk rendering. These tests used development clients, so whether the same crash occurs with a packaged release has not been confirmed. Without Sodium, the latest NeoForge 1.21.11 test loaded and saved a world. The latest NeoForge 1.21.1 profile with Sodium, Cloth Config, and YACL also loaded and saved a world.
+Fabric API is required by the Fabric 1.21.x jars; the 26.x Fabric jars do not require it. Both 26.1.x jars are built against Minecraft 26.1.2 and declare compatibility with the 26.1 patch line. Clean builds and tests also pass against Minecraft 26.1 and 26.1.1 with their matching NeoForge loader builds. No dependencies are bundled. Cloth Config and YACL are optional alternative settings screens. Mod Menu is an optional Fabric menu entry, while Sodium and Sodium FPS Cap Fix are recognized for FPS-slider compatibility only. Optional mods and their combinations are not all tested together, and compatibility depends on their exact versions.
+
+**NeoForge 1.21.11 and Sodium:** A development client using Sodium 0.8.14 with NeoForge 21.11.48 (also observed with 21.11.45) crashed during world rendering with a `ValidationGpuTexture` to `GlTexture` cast in Sodium's chunk renderer. AccurateFPS+'s Sodium integration only changes FPS-slider controls, not chunk rendering. This was observed with 1.3-r1; the 1.4-r1 runtime combination has not been verified.
 
 ---
 

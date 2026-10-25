@@ -80,6 +80,7 @@ processResources {
     def metadata = [
         mod_version: project.version,
         minecraft_version: project.minecraft_version,
+        minecraft_version_range: project.minecraft_version_range,
         neoforge_version: project.neoforge_version,
         cloth_config_min_version: project.cloth_config_min_version,
         yacl_min_version: project.yacl_min_version,
