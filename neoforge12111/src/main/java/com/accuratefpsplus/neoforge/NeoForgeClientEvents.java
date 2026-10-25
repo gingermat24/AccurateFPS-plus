@@ -17,9 +17,7 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 
 final class NeoForgeClientEvents {
-    private static final KeyMapping.Category KEY_CATEGORY = new KeyMapping.Category(
-        Identifier.fromNamespaceAndPath("accuratefpsplus", "general")
-    );
+    private static final KeyMapping.Category KEY_CATEGORY = AccurateFpsPlusClient.getKeyCategory();
     private static final KeyMapping TOGGLE_HUD = new KeyMapping(
         "key.accuratefpsplus.toggleHUD",
         InputConstants.Type.KEYSYM,

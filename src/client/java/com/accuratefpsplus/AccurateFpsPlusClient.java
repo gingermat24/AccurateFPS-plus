@@ -34,8 +34,9 @@ public class AccurateFpsPlusClient {
     private static KeyMapping toggleHudKey;
     private static KeyMapping cyclePresetKey;
     private static KeyMapping openConfigKey;
-    private static final KeyMapping.Category KEY_CATEGORY =
-        KeyMapping.Category.register(Identifier.fromNamespaceAndPath("accuratefpsplus", "general"));
+    private static final Identifier KEY_CATEGORY_ID =
+        Identifier.fromNamespaceAndPath("accuratefpsplus", "general");
+    private static KeyMapping.Category keyCategory = new KeyMapping.Category(KEY_CATEGORY_ID);
     protected static boolean toggleHUD;
     protected static boolean hideWithF3;
     protected static int hudScalePercent;
@@ -126,6 +127,15 @@ public class AccurateFpsPlusClient {
         toggleHudKey = toggleKey;
         cyclePresetKey = presetCycleKey;
         openConfigKey = configKey;
+    }
+
+    @SuppressWarnings("deprecation")
+    public static void registerKeyCategory() {
+        keyCategory = KeyMapping.Category.register(KEY_CATEGORY_ID);
+    }
+
+    public static KeyMapping.Category getKeyCategory() {
+        return keyCategory;
     }
 
     public static KeyMapping getToggleHudKeyMapping() {
@@ -471,7 +481,7 @@ public class AccurateFpsPlusClient {
     }
 
     public static KeyMapping createKeyMapping(String translationKey) {
-        return new KeyMapping(translationKey, InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), KEY_CATEGORY);
+        return new KeyMapping(translationKey, InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), keyCategory);
     }
 
     public static int detectDisplayRefreshRate() {

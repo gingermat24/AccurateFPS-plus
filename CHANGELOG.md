@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.4-r1
+
+- Added 26.1.x compatibility ranges to the Fabric and NeoForge jars, both built against Minecraft 26.1.2. Clean builds and tests pass for both loader projects against Minecraft 26.1, 26.1.1, and 26.1.2 using their matching loader builds. Added separate Fabric and NeoForge targets for 26.2 and 26.3 while retaining distinct 1.21.1 and 1.21.11 builds.
+- Configured the 26.x Fabric projects with non-remapping Loom and Java 25; the 1.21.x projects retain remapping Loom and Java 21.
+- Added target-specific Minecraft adapters for screen access, keyboard input, display refresh-rate detection, and HUD render hooks. The 26.1 target uses a distinct HUD Mixin configuration from 26.2/26.3.
+- Added root artifact aggregation and metadata checks for all ten loader/version jars; CI now builds and uploads the complete matrix.
+- Removed Fabric API from the 26.x Fabric compile/runtime metadata. The 26.x Fabric entrypoint defers keybinding insertion until client options exist; HUD/tick callbacks use client Mixins. Updated the 26.x class-tweaker namespace for unobfuscated Minecraft.
+- Fixed the FPS-limit slider endpoint across supported targets: 1–1000 FPS is followed by an Unlimited stop mapped to Minecraft's unlimited value. Updated the 26.x Sodium formatter mixin to Sodium 0.9.2's `lambda$fpsLimit$0` target.
+- Prevented unchanged metric-visibility save callbacks from switching the active HUD preset to Custom when unrelated settings are saved.
+- Moved NeoForge 1.21.11 key-category registration into its key-mapping event, eliminating an eager deprecated shared registration.
+- Kept Cloth Config, YACL, Mod Menu, and Sodium compile-only for optional integration; updated their 26.x compile pins to versions published for each target.
+- Ported the native NeoForge settings editor to the 26.x screen and render-state APIs, retaining all settings pages, metric controls, validation, scrolling, preset handling, and JSON persistence without requiring an optional UI library.
+- NeoForge 26.x registers its Mods-list screen through `IConfigScreenFactory`; Cloth Config and YACL remain optional alternate editors.
+- Sodium 0.8.14 remains incompatible with NeoForge 1.21.11; see the compatibility note in the README.
+
 ## 1.3-r1 - 18/10/2026 (18:00 italian time)
 
 - Updated the NeoForge build targets to 21.1.263 for Minecraft 1.21.1 and 21.11.48 for Minecraft 1.21.11.
@@ -19,7 +34,7 @@
 - Added deterministic tests for inactive intervals, one-second gaps, irregular frame durations, small sample windows, and distinct low-percentile ranks.
 - Synthetic engine-only stress profile (1,000 FPS, 60-second history, 1 ms statistic and percentile refresh intervals, 3 simulated seconds): elapsed time fell from 100.4 ms to 11.5 ms (about 88.5% lower), and allocation fell from 72.4 MB to 333 KB (about 99.5% lower). This is a synthetic engine-only measurement, not an in-game benchmark; it does not establish a gameplay performance gain.
 
-## 1.2-r2 - 2026-10-11
+## 1.2-r2 - 2026-10-11 (21:50 italian time)
 
 - Added separate NeoForge release jars for Minecraft 1.21.1 and 1.21.11, while retaining the existing Fabric jars and the `1.2-r2` version.
 - Ported the HUD, all seven telemetry metrics, settings, presets, keybinds, F3 behavior, precise FPS slider, and optional Sodium slider integration to NeoForge.
@@ -35,7 +50,7 @@
 - Updated the Gradle wrapper to 9.8.1 and Fabric Loom to 1.18.3 for both supported Minecraft targets.
 - Updated the JUnit BOM to 6.1.3 for both target builds.
 
-## 1.2-r1 - 05/10/2026
+## 1.2-r1 - 05/10/2026 (19:20 italian time)
 
 - Added a client-side public API (`com.accuratefpsplus.api.AccurateFpsApi`) for companion and third-party mods to read the live HUD metrics: FPS, AVG, MAX, MIN, 1% Low, 0.1% Low, and Frametime.
 - Added a real-time Frametime metric (`ms`) to monitor measured frame duration alongside framerate.
@@ -61,7 +76,7 @@
 - Reported FPS-limit and settings-file I/O failures and preserved unreadable settings instead of silently replacing them with defaults.
 - Updated the root build to build both supported Minecraft targets and place both release jars in `build/libs`; CI uploads that shared output folder.
 
-## 1.1-r1 - 27/09/2026
+## 1.1-r1 - 27/09/2026 (17:30 italian time)
 
 - Replaced discrete color jumps with a smooth RGB gradient that dynamically blends across Low, Medium, and High colors. Every framerate value now has an accurate, smoothly transitioning color.
 - Added visual color pickers to customize all three gradient anchor points. Defaults: Low (`#FF5555` Red), Medium (`#FFFF55` Yellow), High (`#55FF55` Green).
@@ -75,7 +90,7 @@
 - Optimized percentile calculations (`quickSelect`) with median-of-three pivot selection and NaN sanitization to ensure fast, stutter-free 1% and 0.1% low tracking.
 - Upgraded config storage with automatic migration for older settings, UTF-8 file encoding, and formatted JSON output.
 
-## 1.0-r2 Refabricated - 14/09/2026
+## 1.0-r2 Refabricated - 14/09/2026 (18:55 italian time)
 
 **Finally managed to fix the code and recover everything directly from the uploaded JAR file!**
 
@@ -91,6 +106,6 @@ _The only updated version is Fabric 1.21.11 (version with the most downloads), a
 
 _Note: Sadly, a lot of unreleased additions and features in progress were lost when the original project files were lost._
 
-## 1.0-r1 02/05/2026
+## 1.0-r1 02/05/2026 (11:40 italian time)
 
 No changelog was provided.

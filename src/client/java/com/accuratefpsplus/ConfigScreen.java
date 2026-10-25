@@ -322,8 +322,10 @@ public class ConfigScreen {
         sub.add((AbstractConfigListEntry)builder.entryBuilder().startBooleanToggle(
             (Component)Component.translatable((String)("option.accuratefpsplus." + showKey)), showVal
         ).setDefaultValue(showDefault).setSaveConsumer(v -> {
+            if (showVal != (boolean)v) {
+                AccurateFpsPlusClient.currentPreset = 0;
+            }
             showSet.accept((boolean)v);
-            AccurateFpsPlusClient.currentPreset = 0;
         }).build());
         if (showVal) {
             sub.add((AbstractConfigListEntry)builder.entryBuilder().startIntSlider(

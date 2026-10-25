@@ -10,6 +10,6 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 public class SodiumControlValueFormatterImplsMixin {
     @ModifyConstant(method={"lambda$fpsLimit$2"}, constant={@Constant(intValue=260)})
     private static int accuratefpsplus$changeUnlimitedThreshold(int original) {
-        return 1000;
+        return 1001;
     }
 }

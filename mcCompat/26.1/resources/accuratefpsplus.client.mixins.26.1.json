@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "com.accuratefpsplus.mixin.client",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+    "GameOptionsPreciseFpsMixin",
+    "MinecraftClientTickMixin",
+    "GuiRenderStateMixin",
+    "OptionsAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

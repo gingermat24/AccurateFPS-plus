@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 public class SodiumConfigBuilderMixin {
     @ModifyConstant(method={"buildGeneralPage"}, constant={@Constant(intValue=260)})
     private int accuratefpsplus$changeMaxFps(int original) {
-        return 1000;
+        return 1001;
     }
 
     @ModifyConstant(method={"buildGeneralPage"}, constant={@Constant(intValue=10, ordinal=0)})

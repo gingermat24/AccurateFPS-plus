@@ -213,32 +213,82 @@ def copyNeoForge12111Jar = tasks.register("copyNeoForge12111Jar", Copy) {
 	}
 }
 
+def addVersionJar = { String taskSuffix, String projectDirectory, String minecraftVersion, String loader ->
+	def buildTask = tasks.register("build${taskSuffix}", Exec) {
+		group = "build"
+		description = "Builds ${loader} for Minecraft ${minecraftVersion}"
+		workingDir = rootDir
+		if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+			commandLine 'cmd', '/c', '.\\gradlew.bat', '-p', projectDirectory, 'clean', 'build'
+		} else {
+			commandLine './gradlew', '-p', projectDirectory, 'clean', 'build'
+		}
+	}
+
+	def copyTask = tasks.register("copy${taskSuffix}Jar", Copy) {
+		group = "build"
+		description = "Copies the ${loader} ${minecraftVersion} release jar into build/libs"
+		dependsOn buildTask
+
+		def artifact = file("${projectDirectory}/build/libs/accuratefpsplus-${minecraftVersion}-${project.version}-${loader}.jar")
+		from(artifact)
+		into(layout.buildDirectory.dir("libs"))
+
+		doFirst {
+			if (!artifact.isFile()) {
+				throw new GradleException("Minecraft ${minecraftVersion} ${loader} jar was not produced: ${artifact}")
+			}
+		}
+	}
+
+	return copyTask
+}
+
+def copyFabric261Jar = addVersionJar("Fabric261", "fabric26_1", "26.1.2", "fabric")
+def copyFabric262Jar = addVersionJar("Fabric262", "fabric26_2", "26.2", "fabric")
+def copyFabric263Jar = addVersionJar("Fabric263", "fabric26", "26.3", "fabric")
+def copyNeoForge261Jar = addVersionJar("NeoForge261", "neoforge26_1", "26.1.2", "neoforge")
+def copyNeoForge262Jar = addVersionJar("NeoForge262", "neoforge26_2", "26.2", "neoforge")
+def copyNeoForge263Jar = addVersionJar("NeoForge263", "neoforge26", "26.3", "neoforge")
+
 tasks.named("build") {
 	dependsOn copy1211Jar
 	dependsOn copyNeoForge1211Jar
 	dependsOn copyNeoForge12111Jar
+	dependsOn copyFabric261Jar
+	dependsOn copyFabric262Jar
+	dependsOn copyFabric263Jar
+	dependsOn copyNeoForge261Jar
+	dependsOn copyNeoForge262Jar
+	dependsOn copyNeoForge263Jar
 }
 
 tasks.register("buildAllVersions") {
-group = "build"
-description = "Builds Fabric and NeoForge artifacts for Minecraft 1.21.1 and 1.21.11 into build/libs"
-dependsOn "build"
-dependsOn "verifyReleaseJars"
+	group = "build"
+	description = "Builds all supported Fabric and NeoForge release jars into build/libs"
+	dependsOn "build"
+	dependsOn "verifyReleaseJars"
 }
 
 def releaseVersion = project.version
 
 tasks.register("verifyReleaseJars") {
 	group = "verification"
-	description = "Verifies all four release jars have matching feature classes and loader-specific metadata"
+	description = "Verifies every release jar has matching feature classes and loader-specific metadata"
 	dependsOn "build"
 
 	doLast {
 		def expectedArtifacts = [
-			"accuratefpsplus-1.21.1-${releaseVersion}-fabric.jar"   : ["fabric", "1.21.1"],
-			"accuratefpsplus-1.21.1-${releaseVersion}-neoforge.jar": ["neoforge", "1.21.1"],
-			"accuratefpsplus-1.21.11-${releaseVersion}-fabric.jar" : ["fabric", "1.21.11"],
-			"accuratefpsplus-1.21.11-${releaseVersion}-neoforge.jar": ["neoforge", "1.21.11"]
+			"accuratefpsplus-1.21.1-${releaseVersion}-fabric.jar"     : [loader: "fabric", minecraft: "1.21.1", mixin: "accuratefpsplus.client.mixins.json"],
+			"accuratefpsplus-1.21.1-${releaseVersion}-neoforge.jar"  : [loader: "neoforge", minecraft: "[1.21.1]", mixin: "accuratefpsplus.client.mixins.json"],
+			"accuratefpsplus-1.21.11-${releaseVersion}-fabric.jar"   : [loader: "fabric", minecraft: "1.21.11", mixin: "accuratefpsplus.client.mixins.json"],
+			"accuratefpsplus-1.21.11-${releaseVersion}-neoforge.jar": [loader: "neoforge", minecraft: "[1.21.11]", mixin: "accuratefpsplus.client.mixins.json"],
+			"accuratefpsplus-26.1.2-${releaseVersion}-fabric.jar"   : [loader: "fabric", minecraft: ">=26.1 <26.2", mixin: "accuratefpsplus.client.mixins.26.1.json"],
+			"accuratefpsplus-26.1.2-${releaseVersion}-neoforge.jar": [loader: "neoforge", minecraft: "[26.1,26.2)", neoforge: "[26.1.0.0-beta,26.2)", mixin: "accuratefpsplus.neoforge.client.mixins.26.1.json"],
+			"accuratefpsplus-26.2-${releaseVersion}-fabric.jar"    : [loader: "fabric", minecraft: "26.2", mixin: "accuratefpsplus.client.mixins.json"],
+			"accuratefpsplus-26.2-${releaseVersion}-neoforge.jar" : [loader: "neoforge", minecraft: "[26.2]", mixin: "accuratefpsplus.neoforge.client.mixins.json"],
+			"accuratefpsplus-26.3-${releaseVersion}-fabric.jar"    : [loader: "fabric", minecraft: "26.3", mixin: "accuratefpsplus.client.mixins.json"],
+			"accuratefpsplus-26.3-${releaseVersion}-neoforge.jar" : [loader: "neoforge", minecraft: "[26.3]", mixin: "accuratefpsplus.neoforge.client.mixins.json"]
 		]
 		def sharedEntries = [
 			"com/accuratefpsplus/AccurateFpsPlusClient.class",
@@ -249,7 +299,6 @@ tasks.register("verifyReleaseJars") {
 			"com/accuratefpsplus/FpsTelemetryEngine.class",
 			"com/accuratefpsplus/ThresholdMode.class",
 			"com/accuratefpsplus/api/AccurateFpsApi.class",
-			"accuratefpsplus.client.mixins.json",
 			"accuratefpsplus.sodium.mixins.json",
 			"assets/accuratefpsplus/lang/en_us.json"
 		]
@@ -270,7 +319,7 @@ tasks.register("verifyReleaseJars") {
 
 				def hasFabricMetadata = entries.contains("fabric.mod.json")
 				def hasNeoForgeMetadata = entries.contains("META-INF/neoforge.mods.toml")
-				if (expected[0] == "fabric") {
+				if (expected.loader == "fabric") {
 					if (!hasFabricMetadata || hasNeoForgeMetadata || !entries.contains("accuratefpsplus.accesswidener")) {
 						throw new GradleException("${filename} does not contain only the expected Fabric metadata")
 					}
@@ -278,11 +327,17 @@ tasks.register("verifyReleaseJars") {
 					archive.getInputStream(archive.getEntry("fabric.mod.json")).withCloseable { stream ->
 						metadata = new groovy.json.JsonSlurper().parse(stream)
 					}
-					if (metadata.version != releaseVersion || metadata.depends.minecraft != expected[1]) {
-						throw new GradleException("${filename} metadata does not match version ${releaseVersion} and Minecraft ${expected[1]}")
+					if (metadata.version != releaseVersion || metadata.depends.minecraft != expected.minecraft) {
+						throw new GradleException("${filename} metadata does not match version ${releaseVersion} and Minecraft ${expected.minecraft}")
+					}
+					if (metadata.mixins == null || !metadata.mixins.any { it.config == expected.mixin }) {
+						throw new GradleException("${filename} is missing its ${expected.mixin} Mixin configuration")
 					}
 					if (!entries.contains("com/accuratefpsplus/AccurateFpsPlusFabricClient.class")) {
 						throw new GradleException("${filename} is missing the Fabric client entrypoint")
+					}
+					if (expected.minecraft.startsWith("26.") && metadata.depends.containsKey("fabric-api")) {
+						throw new GradleException("${filename} must not require Fabric API for the 26.x port")
 					}
 				} else {
 					if (!hasNeoForgeMetadata || hasFabricMetadata || entries.contains("accuratefpsplus.accesswidener")) {
@@ -292,11 +347,21 @@ tasks.register("verifyReleaseJars") {
 					archive.getInputStream(archive.getEntry("META-INF/neoforge.mods.toml")).withCloseable { stream ->
 						metadata = stream.getText("UTF-8")
 					}
-					if (!metadata.contains("version=\"${releaseVersion}\"") || !metadata.contains("versionRange=\"[${expected[1]}]\"")) {
-						throw new GradleException("${filename} metadata does not match version ${releaseVersion} and Minecraft ${expected[1]}")
+					if (!metadata.contains("version=\"${releaseVersion}\"") || !metadata.contains("versionRange=\"${expected.minecraft}\"")) {
+						throw new GradleException("${filename} metadata does not match version ${releaseVersion} and Minecraft ${expected.minecraft}")
+					}
+					if (expected.neoforge != null && !metadata.contains("versionRange=\"${expected.neoforge}\"")) {
+						throw new GradleException("${filename} NeoForge dependency range does not match ${expected.neoforge}")
+					}
+					if (!entries.contains(expected.mixin)) {
+						throw new GradleException("${filename} is missing its ${expected.mixin} Mixin configuration")
 					}
 					if (!entries.contains("com/accuratefpsplus/neoforge/AccurateFpsPlusNeoForge.class")) {
 						throw new GradleException("${filename} is missing the NeoForge mod entrypoint")
+					}
+					if (expected.minecraft.startsWith("[26.")
+						&& !entries.contains("com/accuratefpsplus/NativeConfigScreen26.class")) {
+						throw new GradleException("${filename} is missing the NeoForge 26.x native settings screen")
 					}
 				}
 			} finally {
