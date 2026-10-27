@@ -8,17 +8,18 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 @Pseudo
 @Mixin(targets = "net.caffeinemc.mods.sodium.client.gui.SodiumConfigBuilder", remap = false)
 public class SodiumConfigBuilderMixin {
-    @ModifyConstant(method={"buildGeneralPage"}, constant={@Constant(intValue=260)})
+    // Newer Sodium versions inherit the range from Minecraft's OptionInstance instead.
+    @ModifyConstant(method={"buildGeneralPage"}, constant={@Constant(intValue=260)}, require=0)
     private int accuratefpsplus$changeMaxFps(int original) {
         return 1001;
     }
 
-    @ModifyConstant(method={"buildGeneralPage"}, constant={@Constant(intValue=10, ordinal=0)})
+    @ModifyConstant(method={"buildGeneralPage"}, constant={@Constant(intValue=10, ordinal=0)}, require=0)
     private int accuratefpsplus$changeMinFps(int original) {
         return 1;
     }
 
-    @ModifyConstant(method={"buildGeneralPage"}, constant={@Constant(intValue=10, ordinal=1)})
+    @ModifyConstant(method={"buildGeneralPage"}, constant={@Constant(intValue=10, ordinal=1)}, require=0)
     private int accuratefpsplus$changeStepFps(int original) {
         return 1;
     }
