@@ -31,16 +31,13 @@ A lightweight, client-side **FPS HUD** mod with an **extended framerate slider**
 
 ## Supported Versions
 
-| Release | Minecraft | Loader |
-| :--- | :---: | :---: |
-| `1.4-r1` **(Latest)** | **1.21.1, 1.21.11** | Fabric, NeoForge |
-|                          | **26.1.x** | Fabric |
-|                          | **26.1.x** | NeoForge |
-|                          | **26.2, 26.3** | Fabric, NeoForge |
-| `1.2-r2` `1.3-r1` | 1.21.1, 1.21.11 | Fabric, NeoForge |
-| `1.2-r1` `1.1-r1` | 1.21.1, 1.21.11 | Fabric |
-| `1.0-r2 Refabricated` | 1.21.11 | Fabric |
-| `1.0-r1` | 1.21.1, 1.21.11 | Fabric, Forge, Quilt |
+| Release               | Minecraft versions                    | Loaders              |
+|-----------------------|---------------------------------------|----------------------|
+| `1.4-r1` **(Latest)** | **1.21.1, 1.21.11, 26.1.x, 26.2, 26.3** | Fabric, NeoForge   |
+| `1.2-r2`, `1.3-r1`    | 1.21.1, 1.21.11                       | Fabric, NeoForge     |
+| `1.2-r1`, `1.1-r1`    | 1.21.1, 1.21.11                       | Fabric               |
+| `1.0-r2 Refabricated` | 1.21.11                               | Fabric               |
+| `1.0-r1`              | 1.21.1, 1.21.11                       | Fabric, Forge, Quilt |
 
 ---
 
@@ -115,9 +112,9 @@ Use **Cycle HUD Preset** in the Controls menu to rotate **Minimal → Competitiv
 
 Optional settings libraries provide alternate configuration screens. NeoForge includes a native screen, and Fabric provides an in-game configuration keybind when either library is installed. Mod Menu adds a Fabric menu entry. The listed FPS-slider integrations are optional; AccurateFPS+ works without them. Optional-mod combinations are not all tested, and no dependencies are bundled.
 
-The 26.1.x release supports the 26.1 patch line. Fabric API is required only on Fabric 1.21.x.
+The 26.1.x jars support Minecraft 26.1, 26.1.1, and 26.1.2. Fabric API is required only on Fabric 1.21.x.
 
-**Sodium compatibility:** Sodium 0.8.14 and 0.8.15-beta.1 have both been observed crashing during chunk rendering with NeoForge 1.21.11. The beta test used NeoForge 21.11.48 and reached a world before Sodium threw a `ValidationGpuTexture` to `GlTexture` `ClassCastException` in `ShaderChunkRenderer.begin`. This is a Sodium/NeoForge renderer failure; AccurateFPS+'s Sodium integration only adjusts FPS-slider controls.
+**Known compatibility issue:** Sodium 0.8.14 and 0.8.15-beta.1 crash during chunk rendering with NeoForge 1.21.11. Avoid this combination for now; the crash occurs in Sodium's renderer, not AccurateFPS+. AccurateFPS+ works with NeoForge 1.21.11 without Sodium.
 
 ---
 
