@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.4-r1
+## 1.4-r1 - 31/10/2026 (12:10 italian time)
 
 - Added Fabric and NeoForge build targets for Minecraft 26.1.x, 26.2, and 26.3 while retaining separate targets for 1.21.1 and 1.21.11. This produces ten loader/version runtime jars. The 26.1.x jars are built against Minecraft 26.1.2 and declare `[26.1,26.2)`; clean builds and tests also pass against 26.1 and 26.1.1 with matching loader versions.
 - Configured Fabric 26.x with non-remapping Loom and Java 25 for unobfuscated Minecraft; 1.21.x retains remapping Loom and Java 21. Removed Fabric API from 26.x compile and runtime metadata. Deferred 26.x key mapping registration until client options are initialized, moved client tick and HUD callbacks to client Mixins, and updated the class-tweaker namespace for unobfuscated classes.
@@ -11,8 +11,11 @@
 - Ported the native NeoForge settings screen to the 26.x screen and render-state APIs, including all settings pages, metric controls, validation, scrolling, preset handling, and JSON persistence. Registered the screen in the NeoForge 26.x Mods list through `IConfigScreenFactory`; Cloth Config and YACL remain optional alternative screens.
 - Added root tasks to aggregate and validate the ten release jars. CI builds and uploads the full target matrix. `buildAllVersions` and `verifyReleaseJars` completed successfully, including the project tests.
 - Updated Fabric Loader from 0.19.5 to 0.20.1 and Fabric Loom from 1.18.4 to 1.19.3 on 1.21.x and from 1.19.2 to 1.19.3 on 26.x. Updated NeoForge from 21.1.263 to 21.1.265 on 1.21.1, from 26.1.2.122 to 26.1.2.124 on 26.1.x, and from 26.3.0.95 to 26.3.0.99 on 26.3. NeoForge 21.11.48 and 26.2.0.93 were already current. Checked Fabric API, Cloth Config, YACL, Mod Menu, ModDevGradle, and JUnit pins; their existing versions were current for the supported targets.
+- Updated NeoForge 26.1.x from 26.1.2.124 to 26.1.2.125 and both Gradle wrappers from 9.8.1 to 9.8.2 after newer stable releases became available.
 - Updated the target-specific Sodium development dependencies to 0.8.15-beta.1 for Fabric and NeoForge 1.21.11, and 0.9.3-beta.1 for Fabric and NeoForge 26.3. Other Sodium pins remain 0.8.13 for 1.21.1 and 0.9.2 for 26.1.x and 26.2. Cloth Config, YACL, Mod Menu, and Sodium are compile-only integrations and are not bundled in the release jars.
-- Runtime-tested the NeoForge 1.21.1 development client with Sodium 0.8.13, Cloth Config 15.0.140, and YACL 3.8.2; it entered a world and exited normally. Runtime-tested NeoForge 26.2 with Sodium 0.9.2, Cloth Config 26.2.155, and YACL 3.9.7 through resource loading and the title screen; no in-world chunk-render test was completed. Fabric 26.3 with Sodium 0.9.3-beta.1 reached a world; NeoForge 26.3 with the same Sodium version completed startup and resource loading, but in-world rendering was not confirmed.
+- Runtime-tested Fabric 1.21.11 with Sodium 0.8.15-beta.1, Cloth Config 21.11.153, YACL 3.8.2, and Mod Menu 17.0.1; it entered a world and rendered without a client crash. Runtime-tested NeoForge 1.21.1 with Sodium 0.8.13, Cloth Config 15.0.140, and YACL 3.8.2; it entered a world and exited normally.
+- Runtime-tested NeoForge 26.2 with Sodium 0.9.2, Cloth Config 26.2.155, and YACL 3.9.7; it loaded a same-version test-world copy, joined the world, rendered chunks, and saved on exit. Fabric 26.3 with Sodium 0.9.3-beta.1 reached a world; NeoForge 26.3 with the same Sodium, Cloth Config 26.3.159, and YACL 3.9.7 also loaded a same-version test-world copy and rendered in-world without a crash.
+- Re-tested NeoForge 26.1.x on 26.1.2.125 with Sodium 0.9.2, Cloth Config 26.1.154, and YACL 3.9.7; it loaded an existing world without a runtime failure.
 - Tested Sodium 0.8.15-beta.1 with NeoForge 21.11.48, Cloth Config 21.11.153, and YACL 3.8.2 in the 1.21.11 development client. The client entered a world and then crashed in Sodium's `ShaderChunkRenderer.begin` with `ClassCastException: ValidationGpuTexture cannot be cast to GlTexture`. Sodium 0.8.14 showed the same renderer failure with NeoForge 21.11.45 and 21.11.48; the 0.8.15-beta.1 test confirms it remains in this setup. The failing stack is in Sodium/NeoForge chunk rendering, not AccurateFPS+'s FPS-slider integration.
 
 ## 1.3-r1 - 18/10/2026 (18:00 italian time)
@@ -23,14 +26,14 @@
 - Verified the latest NeoForge 1.21.1 profile with Sodium, Cloth Config, and YACL, and NeoForge 1.21.11 with Cloth Config and YACL but without Sodium; both loaded and saved a world.
 - Fixed invisible setting names in the NeoForge 1.21.11 native settings screen by drawing custom text with opaque colors; buttons display only their selected values.
 - Routed the NeoForge Open Configuration keybind through the native fallback when neither optional screen library is installed.
-- Hide the Settings Screen selector unless both screen libraries are installed; route Mod Menu, NeoForge, and the keybind through the same saved preference.
+- Hid the Settings Screen selector unless both screen libraries are installed, and routed Mod Menu, NeoForge, and the keybind through the same saved preference.
 - Preserved the saved screen preference when migrating existing configuration files.
 - Added a persistent HUD Size slider from 1% to 200% (100% default), scaling both HUD lines, layout, anchor clamping, and the background overlay.
 - Made both optional settings screens contextual: hide custom coordinates, inactive metric details, and unused overlay/coloring controls; Engine tuning settings remain visible regardless of enabled metrics.
-- Pause telemetry while the HUD is disabled, a screen is open, or Hide with F3 is active; reset the frame-time and polling baseline on resume.
-- Discard active frame gaps of 1 second or longer so suspends and long interruptions do not become FPS, frametime, rolling-statistic, or percentile samples.
-- Calculate 1% Low and 0.1% Low from per-rendered-frame FPS observations using nearest-rank selection over the configured history window; small histories can still produce equal values when their selected ranks coincide.
-- Store percentile frame history in a time-windowed primitive ring and reuse a Quickselect workspace; calculate both lows from one copied sample set when their refreshes coincide.
+- Paused telemetry while the HUD was disabled, a screen was open, or Hide with F3 was active; reset the frame-time and polling baseline on resume.
+- Discarded active frame gaps of 1 second or longer so suspends and long interruptions did not become FPS, frametime, rolling-statistic, or percentile samples.
+- Calculated 1% Low and 0.1% Low from per-rendered-frame FPS observations using nearest-rank selection over the configured history window; small histories can still produce equal values when their selected ranks coincide.
+- Stored percentile frame history in a time-windowed primitive ring and reused a Quickselect workspace; calculated both lows from one copied sample set when their refreshes coincided.
 - Added deterministic tests for inactive intervals, one-second gaps, irregular frame durations, small sample windows, and distinct low-percentile ranks.
 - Synthetic engine-only stress profile (1,000 FPS, 60-second history, 1 ms statistic and percentile refresh intervals, 3 simulated seconds): elapsed time fell from 100.4 ms to 11.5 ms (about 88.5% lower), and allocation fell from 72.4 MB to 333 KB (about 99.5% lower). This is a synthetic engine-only measurement, not an in-game benchmark; it does not establish a gameplay performance gain.
 
