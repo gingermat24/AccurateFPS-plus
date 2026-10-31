@@ -19,25 +19,28 @@ A lightweight, client-side **FPS HUD** mod with an **extended framerate slider**
 * **Presets** - Quickly switch between **Minimal, Competitive, Detailed, and Custom** HUD layouts.
 * **Preset Cycle Keybind** - Cycle through Minimal, Competitive, and Detailed presets in-game; the keybind starts unbound to avoid conflicts with other mods.
 * **In-Game Settings** - Cloth Config and YACL provide optional settings screens. On Fabric, the unbound-by-default **Open Configuration** keybind is available when at least one is installed; the Mod Menu entry is also available when Mod Menu is installed. NeoForge always has a Mods-list entry and a complete native settings screen; when Cloth Config or YACL is installed, it can use the selected optional screen instead. If both are installed, choose between them in General settings; Cloth Config is the default.
-* **Conflict Avoidance** - The framerate slider integration is skipped when specific known FPS-cap or textbox mod IDs are present; this avoids replacing those controls but does not guarantee compatibility with every FPS mod.
 
-  ![preview of the All Metrics preset](https://cdn.modrinth.com/data/cached_images/14a662614a47160304e1bd56a96e22dd3d15b1ec.gif)
-  > "_All Metrics_" preset + _Fixed Auto-Coloring_ (before dynamic gradient) - **v1.0-r1**
+* **Conflict Avoidance** - The framerate slider integration is skipped when specific known FPS-cap or textbox mod IDs are present. This avoids replacing those controls, but does not guarantee compatibility with every FPS mod.
 
-  ![All seven metrics](https://cdn.modrinth.com/data/cached_images/8ff9e851312c58caf3633ba5ee912959c4eb9d73_0.webp)
-  > All seven metrics with dynamic FPS coloring
+![preview of the All Metrics preset](https://cdn.modrinth.com/data/cached_images/14a662614a47160304e1bd56a96e22dd3d15b1ec.gif)
+
+> "_All Metrics_" preset + _Fixed Auto-Coloring_ (before dynamic gradient) - **v1.0-r1**
+
+![All seven metrics](https://cdn.modrinth.com/data/cached_images/8ff9e851312c58caf3633ba5ee912959c4eb9d73_0.webp)
+
+> All seven metrics with dynamic FPS coloring
 
 ---
 
 ## Supported Versions
 
-| Release               | Minecraft versions                    | Loaders              |
-|-----------------------|---------------------------------------|----------------------|
-| `1.4-r1` **(Latest)** | **1.21.1, 1.21.11, 26.1.x, 26.2, 26.3** | Fabric, NeoForge   |
-| `1.2-r2`, `1.3-r1`    | 1.21.1, 1.21.11                       | Fabric, NeoForge     |
-| `1.2-r1`, `1.1-r1`    | 1.21.1, 1.21.11                       | Fabric               |
-| `1.0-r2 Refabricated` | 1.21.11                               | Fabric               |
-| `1.0-r1`              | 1.21.1, 1.21.11                       | Fabric, Forge, Quilt |
+| Release               | Minecraft versions                      | Loaders              |
+|-----------------------|-----------------------------------------|----------------------|
+| `1.4-r1` **(Latest)** | **1.21.1, 1.21.11, 26.1.x, 26.2, 26.3** | Fabric, NeoForge     |
+| `1.2-r2`, `1.3-r1`    | 1.21.1, 1.21.11                         | Fabric, NeoForge     |
+| `1.2-r1`, `1.1-r1`    | 1.21.1, 1.21.11                         | Fabric               |
+| `1.0-r2 Refabricated` | 1.21.11                                 | Fabric               |
+| `1.0-r1`              | 1.21.1, 1.21.11                         | Fabric, Forge, Quilt |
 
 ---
 

@@ -26,14 +26,14 @@
 - Verified the latest NeoForge 1.21.1 profile with Sodium, Cloth Config, and YACL, and NeoForge 1.21.11 with Cloth Config and YACL but without Sodium; both loaded and saved a world.
 - Fixed invisible setting names in the NeoForge 1.21.11 native settings screen by drawing custom text with opaque colors; buttons display only their selected values.
 - Routed the NeoForge Open Configuration keybind through the native fallback when neither optional screen library is installed.
-- Hide the Settings Screen selector unless both screen libraries are installed; route Mod Menu, NeoForge, and the keybind through the same saved preference.
+- Hid the Settings Screen selector unless both screen libraries are installed, and routed Mod Menu, NeoForge, and the keybind through the same saved preference.
 - Preserved the saved screen preference when migrating existing configuration files.
 - Added a persistent HUD Size slider from 1% to 200% (100% default), scaling both HUD lines, layout, anchor clamping, and the background overlay.
 - Made both optional settings screens contextual: hide custom coordinates, inactive metric details, and unused overlay/coloring controls; Engine tuning settings remain visible regardless of enabled metrics.
-- Pause telemetry while the HUD is disabled, a screen is open, or Hide with F3 is active; reset the frame-time and polling baseline on resume.
-- Discard active frame gaps of 1 second or longer so suspends and long interruptions do not become FPS, frametime, rolling-statistic, or percentile samples.
-- Calculate 1% Low and 0.1% Low from per-rendered-frame FPS observations using nearest-rank selection over the configured history window; small histories can still produce equal values when their selected ranks coincide.
-- Store percentile frame history in a time-windowed primitive ring and reuse a Quickselect workspace; calculate both lows from one copied sample set when their refreshes coincide.
+- Paused telemetry while the HUD was disabled, a screen was open, or Hide with F3 was active; reset the frame-time and polling baseline on resume.
+- Discarded active frame gaps of 1 second or longer so suspends and long interruptions did not become FPS, frametime, rolling-statistic, or percentile samples.
+- Calculated 1% Low and 0.1% Low from per-rendered-frame FPS observations using nearest-rank selection over the configured history window; small histories can still produce equal values when their selected ranks coincide.
+- Stored percentile frame history in a time-windowed primitive ring and reused a Quickselect workspace; calculated both lows from one copied sample set when their refreshes coincided.
 - Added deterministic tests for inactive intervals, one-second gaps, irregular frame durations, small sample windows, and distinct low-percentile ranks.
 - Synthetic engine-only stress profile (1,000 FPS, 60-second history, 1 ms statistic and percentile refresh intervals, 3 simulated seconds): elapsed time fell from 100.4 ms to 11.5 ms (about 88.5% lower), and allocation fell from 72.4 MB to 333 KB (about 99.5% lower). This is a synthetic engine-only measurement, not an in-game benchmark; it does not establish a gameplay performance gain.
 
