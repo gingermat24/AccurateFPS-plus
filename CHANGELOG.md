@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.4-r1
+## 1.4-r1 - 31/10/2026 (12:10 italian time)
 
 - Added Fabric and NeoForge build targets for Minecraft 26.1.x, 26.2, and 26.3 while retaining separate targets for 1.21.1 and 1.21.11. This produces ten loader/version runtime jars. The 26.1.x jars are built against Minecraft 26.1.2 and declare `[26.1,26.2)`; clean builds and tests also pass against 26.1 and 26.1.1 with matching loader versions.
 - Configured Fabric 26.x with non-remapping Loom and Java 25 for unobfuscated Minecraft; 1.21.x retains remapping Loom and Java 21. Removed Fabric API from 26.x compile and runtime metadata. Deferred 26.x key mapping registration until client options are initialized, moved client tick and HUD callbacks to client Mixins, and updated the class-tweaker namespace for unobfuscated classes.

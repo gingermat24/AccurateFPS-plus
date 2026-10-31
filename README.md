@@ -102,7 +102,7 @@ Use **Cycle HUD Preset** in the Controls menu to rotate **Minimal → Competitiv
 
 ## Dependencies & Compatibility
 
-| Minecraft version | Loader | Required | Optional settings/menu mods | FPS-slider integrations |
+| Minecraft version | Loader | 📦 Required | ⚙️ Optional | ✅ Compatible |
 |---|---|---|---|---|
 | 1.21.1 | Fabric | [Fabric API](https://modrinth.com/mod/fabric-api) | [Cloth Config](https://modrinth.com/mod/cloth-config), [YACL](https://modrinth.com/mod/yacl), [Mod Menu](https://modrinth.com/mod/modmenu) | [Sodium](https://modrinth.com/mod/sodium), [Sodium FPS Cap Fix](https://modrinth.com/mod/sodiumfpscapfix) |
 |  | NeoForge | None | [Cloth Config](https://modrinth.com/mod/cloth-config), [YACL](https://modrinth.com/mod/yacl) | [Sodium](https://modrinth.com/mod/sodium) |
