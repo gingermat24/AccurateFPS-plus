@@ -42,6 +42,8 @@ A lightweight, client-side **FPS HUD** mod with an **extended framerate slider**
 | `1.0-r2 Refabricated` | 1.21.11                                 | Fabric               |
 | `1.0-r1`              | 1.21.1, 1.21.11                         | Fabric, Forge, Quilt |
 
+> **Known compatibility issue - NeoForge 1.21.11:** Sodium 0.8.14 and 0.8.15-beta.1 crash during chunk rendering because of an issue in Sodium's renderer. Avoid this combination for now. AccurateFPS+ works with NeoForge 1.21.11 without Sodium.
+
 ---
 
 ## Configuration
@@ -117,8 +119,6 @@ Optional settings libraries provide alternate configuration screens. NeoForge in
 
 The 26.1.x jars support Minecraft 26.1, 26.1.1, and 26.1.2. Fabric API is required only on Fabric 1.21.x.
 
-**Known compatibility issue:** Sodium 0.8.14 and 0.8.15-beta.1 crash during chunk rendering with NeoForge 1.21.11. Avoid this combination for now; the crash occurs in Sodium's renderer, not AccurateFPS+. AccurateFPS+ works with NeoForge 1.21.11 without Sodium.
-
 ---
 
 ## Links & Modpack Policy
@@ -127,8 +127,10 @@ The 26.1.x jars support Minecraft 26.1, 26.1.1, and 26.1.2. Fabric API is requir
 
 - **[Modrinth](https://modrinth.com/project/AQGahqU5)**
 - **[GitHub](https://github.com/gingermat24/AccurateFPS-plus)**
-- **[Report an issue](https://github.com/gingermat24/AccurateFPS-plus/issues)**
+- **[Report an issue or request a feature](https://github.com/gingermat24/AccurateFPS-plus/issues)**
 - Contact: Discord (`matteo.sb`)
+
+Have a request or a specific addition you'd like to see? Open a GitHub issue or contact me on Discord.
 
 **MIT License** - Source code is available in this GitHub repository.
 
