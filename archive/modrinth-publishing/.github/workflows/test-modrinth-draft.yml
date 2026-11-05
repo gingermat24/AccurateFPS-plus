@@ -1,0 +1,41 @@
+name: test-modrinth-draft
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: modrinth-draft-test
+  cancel-in-progress: false
+
+jobs:
+  test-draft:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-24.04
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v6
+      - name: setup jdk
+        uses: actions/setup-java@v5
+        with:
+          java-version: |
+            21
+            25
+          distribution: microsoft
+      - name: setup node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - name: make gradle wrapper executable
+        run: chmod +x ./gradlew ./mc1211/gradlew
+      - name: test Modrinth metadata
+        run: node --test scripts/*.test.mjs
+      - name: build and verify release jars
+        run: ./gradlew buildAllVersions
+      - name: create one draft test version
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          MDVSTOKEN: ${{ secrets.MDVSTOKEN }}
+        run: node scripts/publish-modrinth.mjs --test-draft

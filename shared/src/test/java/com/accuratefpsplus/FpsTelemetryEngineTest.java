@@ -216,6 +216,38 @@ class FpsTelemetryEngineTest {
     }
 
     @Test
+    void percentileHistoryExpiresFramesOutsideTheWindowButKeepsTheCutoffFrame() {
+        FpsTelemetryEngine engine = new FpsTelemetryEngine(0L);
+        engine.setCalculationMode(0);
+        engine.setComputePercentiles(true);
+
+        engine.onFrameAt(20L * NANOS_PER_MILLI, 1, 1, 1, 1, 1, 1, 1, 20L);
+        engine.onFrameAt(30L * NANOS_PER_MILLI, 1, 1, 1, 1, 1, 1, 1, 20L);
+        engine.onFrameAt(40L * NANOS_PER_MILLI, 1, 1, 1, 1, 1, 1, 1, 20L);
+
+        assertEquals(50.0, engine.getDisplayedOnePercentLow(), 1e-9);
+        assertEquals(50.0, engine.getDisplayedZeroOnePercentLow(), 1e-9);
+    }
+
+    @Test
+    void disablingPercentileCollectionClearsOldFramesBeforeItIsReenabled() {
+        FpsTelemetryEngine engine = new FpsTelemetryEngine(0L);
+        engine.setCalculationMode(0);
+        engine.setComputePercentiles(true);
+        engine.onFrameAt(10L * NANOS_PER_MILLI, 1, 1, 1, 1, 1, 1, 1, 1_000L);
+
+        assertEquals(100.0, engine.getDisplayedOnePercentLow(), 1e-9);
+
+        engine.setComputePercentiles(false);
+        engine.onFrameAt(20L * NANOS_PER_MILLI, 1, 1, 1, 1, 1, 1, 1, 1_000L);
+        engine.setComputePercentiles(true);
+        engine.onFrameAt(40L * NANOS_PER_MILLI, 1, 1, 1, 1, 1, 1, 1, 1_000L);
+
+        assertEquals(50.0, engine.getDisplayedOnePercentLow(), 1e-9);
+        assertEquals(50.0, engine.getDisplayedZeroOnePercentLow(), 1e-9);
+    }
+
+    @Test
     void pausedTimeDoesNotEnterFrametimeOrRollingMetrics() {
         FpsTelemetryEngine engine = new FpsTelemetryEngine(0L);
         engine.setCalculationMode(0);

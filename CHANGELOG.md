@@ -3,7 +3,7 @@
 ## 1.4-r2 (in development)
 
 - Improved telemetry efficiency: AVG, MAX, and MIN now use rolling history aggregates instead of rescanning retained samples. Metric behavior is unchanged; this reduces repeated work when polling or refresh intervals are very short.
-- Added regression tests for history-window changes, sample expiration, and sustained 1 ms polling.
+- Added a deterministic 500-sample reference comparison for rolling AVG/MAX/MIN across expiration and history-window changes; covered sustained 1 ms polling, the inclusive percentile-window cutoff, and clearing percentile samples when collection is disabled.
 - Matched NeoForge 26.x native settings text-field limits and numeric/color input filtering to the 1.21.x screen.
 
 ## 1.4-r1 - 31/10/2026 (12:10 italian time)

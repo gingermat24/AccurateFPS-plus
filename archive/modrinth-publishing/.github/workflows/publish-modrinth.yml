@@ -1,0 +1,43 @@
+name: publish-modrinth
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: modrinth-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v6
+      - name: setup jdk
+        uses: actions/setup-java@v5
+        with:
+          java-version: |
+            21
+            25
+          distribution: microsoft
+      - name: setup node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - name: make gradle wrapper executable
+        run: chmod +x ./gradlew ./mc1211/gradlew
+      - name: test Modrinth release metadata
+        run: node --test scripts/*.test.mjs
+      - name: build and verify release jars
+        run: ./gradlew buildAllVersions
+      - name: validate release metadata
+        run: node scripts/publish-modrinth.mjs --check
+      - name: publish release jars to Modrinth
+        env:
+          MDVSTOKEN: ${{ secrets.MDVSTOKEN }}
+        run: node scripts/publish-modrinth.mjs --publish
