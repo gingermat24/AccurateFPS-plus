@@ -329,7 +329,14 @@ final class NativeConfigScreen26 extends Screen {
     private void addInteger(int targetPage, int targetMetric, int row, String labelKey,
                             int initialValue, int min, int max, IntConsumer setter) {
         Component label = Component.translatable(labelKey);
-        EditBox field = new EditBox(this.font, controlX(), rowY(row), controlWidth(), 20, label);
+        EditBox field = new EditBox(this.font, controlX(), rowY(row), controlWidth(), 20, label) {
+            @Override
+            public void insertText(String value) {
+                if (digitsOnly(value)) {
+                    super.insertText(value);
+                }
+            }
+        };
         field.setMaxLength(10);
         field.setValue(Integer.toString(initialValue));
         field.setResponder(value -> {
@@ -346,7 +353,14 @@ final class NativeConfigScreen26 extends Screen {
     private void addColor(int targetPage, int targetMetric, int row, String labelKey,
                           int initialValue, IntConsumer setter) {
         Component label = Component.translatable(labelKey);
-        EditBox field = new EditBox(this.font, controlX(), rowY(row), controlWidth(), 20, label);
+        EditBox field = new EditBox(this.font, controlX(), rowY(row), controlWidth(), 20, label) {
+            @Override
+            public void insertText(String value) {
+                if (hexDigitsOnly(value)) {
+                    super.insertText(value);
+                }
+            }
+        };
         field.setMaxLength(6);
         field.setValue(String.format("%06X", initialValue & 0xFFFFFF));
         field.setResponder(value -> {
@@ -363,7 +377,7 @@ final class NativeConfigScreen26 extends Screen {
                            String initialValue, Consumer<String> setter) {
         Component label = Component.translatable(labelKey);
         EditBox field = new EditBox(this.font, controlX(), rowY(row), controlWidth(), 20, label);
-        field.setMaxLength(64);
+        field.setMaxLength(128);
         field.setValue(initialValue);
         field.setResponder(value -> {
             setter.accept(value);
@@ -535,6 +549,15 @@ final class NativeConfigScreen26 extends Screen {
         } catch (NumberFormatException ignored) {
             return null;
         }
+    }
+
+    private static boolean digitsOnly(String value) {
+        for (int i = 0; i < value.length(); i++) {
+            if (!Character.isDigit(value.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static boolean hexDigitsOnly(String value) {

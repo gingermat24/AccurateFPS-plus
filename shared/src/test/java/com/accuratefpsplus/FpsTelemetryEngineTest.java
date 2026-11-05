@@ -4,7 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class FpsTelemetryEngineTest {
@@ -76,6 +78,82 @@ class FpsTelemetryEngineTest {
         assertEquals((100.0 + 50.0 + 100.0) / 3.0, engine.getDisplayedAverageFps(), 1e-9);
         assertEquals(100.0, engine.getDisplayedMaxFps(), 1e-9);
         assertEquals(50.0, engine.getDisplayedMinFps(), 1e-9);
+    }
+
+    @Test
+    void rollingStatisticsRespectHistoryWindowChanges() {
+        FpsTelemetryEngine engine = new FpsTelemetryEngine(0L);
+        engine.setCalculationMode(0);
+        engine.onFrameAt(10L * NANOS_PER_MILLI, 1, 1, 1, 1, 1, 1, 1, 100L);
+        engine.onFrameAt(30L * NANOS_PER_MILLI, 1, 1, 1, 1, 1, 1, 1, 100L);
+
+        assertEquals(75.0, engine.getDisplayedAverageFps(), 1e-9);
+        assertEquals(100.0, engine.getDisplayedMaxFps(), 1e-9);
+        assertEquals(50.0, engine.getDisplayedMinFps(), 1e-9);
+
+        engine.onFrameAt(140L * NANOS_PER_MILLI, 1, 1, 1, 1, 1, 1, 1, 100L);
+
+        assertEquals(1_000.0 / 110.0, engine.getDisplayedAverageFps(), 1e-9);
+        assertEquals(1_000.0 / 110.0, engine.getDisplayedMaxFps(), 1e-9);
+        assertEquals(1_000.0 / 110.0, engine.getDisplayedMinFps(), 1e-9);
+
+        engine.onFrameAt(150L * NANOS_PER_MILLI, 1, 1, 1, 1, 1, 1, 1, 200L);
+
+        double expectedAverage = (100.0 + 50.0 + 1_000.0 / 110.0 + 100.0) / 4.0;
+        assertEquals(expectedAverage, engine.getDisplayedAverageFps(), 1e-9);
+        assertEquals(100.0, engine.getDisplayedMaxFps(), 1e-9);
+        assertEquals(1_000.0 / 110.0, engine.getDisplayedMinFps(), 1e-9);
+    }
+
+    @Test
+    void rollingStatisticsHandleFastPollingAcrossLargeHistories() {
+        FpsTelemetryEngine engine = new FpsTelemetryEngine(0L);
+        engine.setCalculationMode(0);
+        long nowNanos = 0L;
+
+        for (int frame = 0; frame < 10_000; frame++) {
+            nowNanos += NANOS_PER_MILLI;
+            engine.onFrameAt(nowNanos, 1, 1, 1, 1, 1, 1, 1, 60_000L);
+        }
+
+        assertEquals(1_000.0, engine.getDisplayedAverageFps(), 1e-9);
+        assertEquals(1_000.0, engine.getDisplayedMaxFps(), 1e-9);
+        assertEquals(1_000.0, engine.getDisplayedMinFps(), 1e-9);
+    }
+
+    @Test
+    void rollingStatisticsMatchReferenceAcrossExpirationsAndWindowChanges() {
+        FpsTelemetryEngine engine = new FpsTelemetryEngine(0L);
+        engine.setCalculationMode(0);
+        List<Sample> samples = new ArrayList<>();
+        long nowNanos = 0L;
+
+        for (int frame = 0; frame < 500; frame++) {
+            long frameDurationNanos = (1L + (frame * 37L) % 20L) * NANOS_PER_MILLI;
+            nowNanos += frameDurationNanos;
+            long historyWindowMillis = 25L + (frame / 17 % 4) * 25L;
+            engine.onFrameAt(nowNanos, 1, 1, 1, 1, 1, 1, 1, historyWindowMillis);
+            samples.add(new Sample(nowNanos, 1.0E9 / frameDurationNanos));
+
+            long cutoffNanos = nowNanos - historyWindowMillis * NANOS_PER_MILLI;
+            double sum = 0.0;
+            double max = Double.NEGATIVE_INFINITY;
+            double min = Double.POSITIVE_INFINITY;
+            int count = 0;
+            for (Sample sample : samples) {
+                if (sample.timestampNanos() < cutoffNanos) {
+                    continue;
+                }
+                sum += sample.fps();
+                max = Math.max(max, sample.fps());
+                min = Math.min(min, sample.fps());
+                count++;
+            }
+
+            assertEquals(sum / count, engine.getDisplayedAverageFps(), 1e-9, "average at frame " + frame);
+            assertEquals(max, engine.getDisplayedMaxFps(), 1e-9, "maximum at frame " + frame);
+            assertEquals(min, engine.getDisplayedMinFps(), 1e-9, "minimum at frame " + frame);
+        }
     }
 
     @Test
@@ -207,5 +285,8 @@ class FpsTelemetryEngineTest {
     private static double nearestRank(double[] sortedValues, double percentile) {
         int index = Math.max(0, (int) Math.ceil(sortedValues.length * percentile) - 1);
         return sortedValues[index];
+    }
+
+    private record Sample(long timestampNanos, double fps) {
     }
 }

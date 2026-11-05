@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.4-r2 (in development)
+
+- Improved telemetry efficiency: AVG, MAX, and MIN now use rolling history aggregates instead of rescanning retained samples. Metric behavior is unchanged; this reduces repeated work when polling or refresh intervals are very short.
+- Added regression tests for history-window changes, sample expiration, and sustained 1 ms polling.
+- Matched NeoForge 26.x native settings text-field limits and numeric/color input filtering to the 1.21.x screen.
+
 ## 1.4-r1 - 31/10/2026 (12:10 italian time)
 
 - Added Fabric and NeoForge build targets for Minecraft 26.1.x, 26.2, and 26.3 while retaining separate targets for 1.21.1 and 1.21.11. This produces ten loader/version runtime jars. The 26.1.x jars are built against Minecraft 26.1.2 and declare `[26.1,26.2)`; clean builds and tests also pass against 26.1 and 26.1.1 with matching loader versions.
