@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.4-r2
+## 1.4-r2 - 16/11/2026 (15:30 italian time)
 
 - Improved telemetry efficiency: AVG, MAX, and MIN now use rolling history aggregates instead of rescanning retained samples. Metric behavior is unchanged; this reduces repeated work when polling or refresh intervals are very short.
 - Added deterministic regression coverage for rolling AVG/MAX/MIN at the inclusive history cutoff, repeated metric-refresh interval changes, sustained 1 ms polling, history-window changes, percentile collection disable/re-enable, and parity of non-percentile metrics with percentile collection on or off.
