@@ -1,141 +1,89 @@
 # AccurateFPS+
 
-A lightweight, client-side **FPS HUD** mod with an **extended framerate slider**, smooth **dynamic gradient coloring**, and detailed performance telemetry. See your performance clearly at a glance and customize the HUD to suit your setup.
+**See more than FPS!** A lightweight, client-side Minecraft HUD for live FPS, frametime, averages, low-percentile readings, and an extended framerate limit.
 
----
+[Download on Modrinth](https://modrinth.com/project/AQGahqU5) · [Report an issue](https://github.com/gingermat24/AccurateFPS-plus/issues)
 
-## Highlights
+> **Latest: 1.4-r2** - more efficient history statistics and safer manual FPS-color thresholds.
 
-* **7 Performance Metrics** - Track **Live FPS, Frametime, AVG, MAX, MIN, 1% Low, and 0.1% Low** to see current performance and framerate stability in detail.
-* **1% & 0.1% Lows** - Calculate low-percentile FPS from valid per-frame observations within the selected history window, revealing slow frames that an average can hide.
-* **Extended FPS Slider** - When no recognized conflicting FPS-cap or textbox mod is installed, AccurateFPS+ replaces the vanilla framerate limit slider with a precise **1–1000 FPS** range, followed by **Unlimited**, in 1 FPS increments. The selected limit persists in its own config file.
-* **Flexible FPS Calculation** - Choose between **Real-Time**, **Averaged**, or **EMA** (exponential moving average) calculation modes.
-* **FPS History & Statistics** - Configure the history window used for AVG and low-percentile calculations from **1s to 60s**. MAX and MIN are also calculated from retained samples.
-* **Measured Frametime** - Display the measured frame duration in milliseconds alongside the FPS metrics.
-* **Smooth Dynamic Gradient** - Blend between customizable **Low, Medium, and High** colors so FPS values transition smoothly rather than switching between fixed colors.
-* **Adaptive or Manual Coloring** - Let **Automatic** mode adapt color thresholds to gameplay performance using EMA baseline smoothing, or set exact thresholds in **Manual** mode.
-* **Deep HUD Customization** - Customize metric visibility, order, position, decimal precision, prefixes, suffixes, colors, text shadow, and background overlay.
-* **HUD Size** - Scale the complete HUD from **1% to 200%**; default is **100%**.
-* **Presets** - Quickly switch between **Minimal, Competitive, Detailed, and Custom** HUD layouts.
-* **Preset Cycle Keybind** - Cycle through Minimal, Competitive, and Detailed presets in-game; the keybind starts unbound to avoid conflicts with other mods.
-* **In-Game Settings** - Cloth Config and YACL provide optional settings screens. On Fabric, the unbound-by-default **Open Configuration** keybind is available when at least one is installed; the Mod Menu entry is also available when Mod Menu is installed. NeoForge always has a Mods-list entry and a complete native settings screen; when Cloth Config or YACL is installed, it can use the selected optional screen instead. If both are installed, choose between them in General settings; Cloth Config is the default.
+<br>
 
-* **Conflict Avoidance** - The framerate slider integration is skipped when specific known FPS-cap or textbox mod IDs are present. This avoids replacing those controls, but does not guarantee compatibility with every FPS mod.
+![AccurateFPS+ HUD showing all seven metrics over Minecraft gameplay](https://cdn.modrinth.com/data/cached_images/8ff9e851312c58caf3633ba5ee912959c4eb9d73_0.webp)
+> Current HUD: all seven metrics with dynamic FPS coloring (v1.2-r1 and later).
 
-![preview of the All Metrics preset](https://cdn.modrinth.com/data/cached_images/14a662614a47160304e1bd56a96e22dd3d15b1ec.gif)
+<br>
 
-> "_All Metrics_" preset + _Fixed Auto-Coloring_ (before dynamic gradient) - **v1.0-r1**
+![Animated preview of the AccurateFPS+ HUD in Minecraft](https://cdn.modrinth.com/data/cached_images/14a662614a47160304e1bd56a96e22dd3d15b1ec.gif)
+> Animated preview from v1.0-r1; the HUD layout and coloring have changed since.
 
-![All seven metrics](https://cdn.modrinth.com/data/cached_images/8ff9e851312c58caf3633ba5ee912959c4eb9d73_0.webp)
 
-> All seven metrics with dynamic FPS coloring
+## What it does
 
----
+- **Shows seven metrics:** FPS, frametime, AVG, MAX, and MIN over your history window, plus 1% Low and 0.1% Low.
+- **Helps reveal frame drops:** Low metrics use valid rendered-frame samples over your selected history window; they are not averages of the slowest frames.
+- **Fits your HUD:** Choose a preset, position, size, metric order, precision, text, colors, shadow, and background.
+- **Sets your FPS limit:** Choose 1–1,000 FPS in one-FPS steps or Unlimited.
+- **Colors FPS at a glance:** Choose automatic thresholds that adapt to gameplay or set manual thresholds.
 
-## Supported Versions
+## Supported versions
 
-| Release               | Minecraft versions                      | Loaders              |
-|-----------------------|-----------------------------------------|----------------------|
-| `1.4-r1` **(Latest)** | **1.21.1, 1.21.11, 26.1.x, 26.2, 26.3** | Fabric, NeoForge     |
-| `1.2-r2`, `1.3-r1`    | 1.21.1, 1.21.11                         | Fabric, NeoForge     |
-| `1.2-r1`, `1.1-r1`    | 1.21.1, 1.21.11                         | Fabric               |
-| `1.0-r2 Refabricated` | 1.21.11                                 | Fabric               |
-| `1.0-r1`              | 1.21.1, 1.21.11                         | Fabric, Forge, Quilt |
+| Release | Minecraft versions | Loaders |
+|---|---|---|
+| `1.4-r2` **(Latest)** | **1.21.1, 1.21.11, 26.1.x, 26.2, 26.3** | Fabric, NeoForge |
+| `1.4-r1` | 1.21.1, 1.21.11, 26.1.x, 26.2, 26.3 | Fabric, NeoForge |
+| `1.3-r1`, `1.2-r2` | 1.21.1, 1.21.11 | Fabric, NeoForge |
+| `1.2-r1`, `1.1-r1` | 1.21.1, 1.21.11 | Fabric |
+| `1.0-r2 Refabricated` | 1.21.11 | Fabric |
+| `1.0-r1` | 1.21.1, 1.21.11 | Fabric, Forge, Quilt |
 
-> **Known compatibility issue - NeoForge 1.21.11:** Sodium 0.8.14 and 0.8.15-beta.1 crash during chunk rendering because of an issue in Sodium's renderer. Avoid this combination for now. AccurateFPS+ works with NeoForge 1.21.11 without Sodium.
+The 26.1.x builds support Minecraft 26.1, 26.1.1, and 26.1.2.
 
----
+## Install
 
-## Configuration
+1. Install Fabric or NeoForge for your Minecraft version.
+2. Download the matching AccurateFPS+ 1.4-r2 jar from [Modrinth](https://modrinth.com/project/AQGahqU5).
+3. Put the jar in your Minecraft `mods` folder and launch the game.
 
-<details>
-<summary>Settings are grouped into up to 4 categories. Engine tuning remains available even when related metrics are disabled. Save changes in the configuration screen; a game restart is not required:</summary>
+**Required:** Fabric API is required for Fabric on Minecraft 1.21.1 and 1.21.11. No additional required library is needed for Fabric 26.x or NeoForge.
 
-### 1. General
-- **Enable HUD** - Toggle HUD visibility.
-- **HUD Toggle Keybinds** - Configure the HUD toggle and preset-cycle keys in Minecraft's Controls menu under AccurateFPS+. The preset-cycle key starts unbound so it cannot conflict with another mod's default shortcut.
-- **Hide with F3** - Automatically hide the HUD while Minecraft's debug screen is active; enabled by default for new installations.
-- **Preset Profile** - Choose Minimal, Competitive, Detailed, or Custom.
-- **HUD Anchor** - Top-Left, Top-Right, Bottom-Left, Bottom-Right, or Custom.
-- **X & Y Offsets** - Fine-tune the HUD position.
-- **Text Shadow** - Toggle text drop shadow.
-- **HUD Size** - Scale all HUD text and the background overlay from 1% to 200% (100% by default).
-- **Settings Screen** - Cloth Config and YACL are optional. NeoForge always provides a native settings screen through its Mods-list entry and configuration keybind; either optional library can be used instead. If both libraries are installed, choose one in General settings.
-- **Background Overlay** - Optional background box with customizable color and transparency.
+### Open the settings
 
-### 2. Metrics
-Choose which of the seven values to show:
-- **FPS** - Current sampled framerate.
-- **Frametime** - Measured frame duration in milliseconds.
-- **Average (AVG)** - Average FPS over the retained history window.
-- **Maximum (MAX)** - Maximum FPS in the retained history window.
-- **Minimum (MIN)** - Minimum FPS in the retained history window.
-- **1% Low** - Nearest-rank low-percentile FPS over valid active render-frame samples.
-- **0.1% Low** - Nearest-rank low-percentile FPS over valid active render-frame samples.
+- **Fabric:** Install Cloth Config or YACL for the Open Configuration keybind. Mod Menu adds a settings entry when installed.
+- **NeoForge:** Open the built-in settings screen from the Mods list. Cloth Config and YACL are optional alternatives.
 
-The 1% and 0.1% Low values are calculated from valid per-frame observations within the selected history window. They use nearest-rank percentile selection, not the average FPS of the slowest frames. Sampling pauses while the HUD is disabled, a screen is open, or F3 is hiding the HUD; frame gaps of one second or longer are ignored.
+### Dependencies and integrations
 
-Each metric can be configured with:
-- Visibility toggle
-- Display slot order (slots 1–4 on the main line and 1–3 on the secondary line)
-- Decimal precision (0 to 4 digits)
-- Custom prefix and suffix text
-- Custom color and automatic coloring
-- Its own refresh interval where supported; FPS and Frametime share the main refresh interval
-
-### 3. Coloring
-- **Threshold Mode** - Choose between:
-  - **Automatic**: Adapts color thresholds to gameplay performance using a smoothed baseline.
-  - **Manual**: Set exact FPS values for Low, Medium, and High transitions.
-- **Monitor Refresh-Rate Detection** - Set manual thresholds from the detected display refresh rate (High = native Hz, Medium = 75%, Low = 50%).
-- **Gradient Colors** - Pick custom RGB colors for Low, Medium, and High FPS states.
-
-### 4. Engine
-- **Calculation Mode** - Real-Time, Averaged, or EMA.
-- **History Window** - 1s, 3s, 5s, 10s, 30s, or 60s for retained samples.
-- **Polling Interval** - Set how often frame data is sampled.
-- **Refresh Intervals** - FPS and Frametime update together; AVG, MAX, MIN, 1% Low, and 0.1% Low have independent refresh intervals. All intervals remain configurable even when their metrics are disabled.
-
-</details>
-
-Use **Cycle HUD Preset** in the Controls menu to rotate **Minimal → Competitive → Detailed → Minimal**. Cycling from a Custom preset starts at Minimal. The selected preset is saved immediately.
-
----
-
-## Dependencies & Compatibility
-
-| Minecraft version | Loader | 📦 Required | ⚙️ Optional | ✅ Compatible |
+| Minecraft | Loader | Required | Optional settings | Compatible integrations |
 |---|---|---|---|---|
 | 1.21.1 | Fabric | [Fabric API](https://modrinth.com/mod/fabric-api) | [Cloth Config](https://modrinth.com/mod/cloth-config), [YACL](https://modrinth.com/mod/yacl), [Mod Menu](https://modrinth.com/mod/modmenu) | [Sodium](https://modrinth.com/mod/sodium), [Sodium FPS Cap Fix](https://modrinth.com/mod/sodiumfpscapfix) |
 |  | NeoForge | None | [Cloth Config](https://modrinth.com/mod/cloth-config), [YACL](https://modrinth.com/mod/yacl) | [Sodium](https://modrinth.com/mod/sodium) |
 | 1.21.11 | Fabric | [Fabric API](https://modrinth.com/mod/fabric-api) | [Cloth Config](https://modrinth.com/mod/cloth-config), [YACL](https://modrinth.com/mod/yacl), [Mod Menu](https://modrinth.com/mod/modmenu) | [Sodium](https://modrinth.com/mod/sodium), [Sodium FPS Cap Fix](https://modrinth.com/mod/sodiumfpscapfix) |
-|  | NeoForge | None | [Cloth Config](https://modrinth.com/mod/cloth-config), [YACL](https://modrinth.com/mod/yacl) | See compatibility note below |
+|  | NeoForge | None | [Cloth Config](https://modrinth.com/mod/cloth-config), [YACL](https://modrinth.com/mod/yacl) | See Sodium compatibility note above |
 | 26.1.x | Fabric | None | [Cloth Config](https://modrinth.com/mod/cloth-config), [YACL](https://modrinth.com/mod/yacl), [Mod Menu](https://modrinth.com/mod/modmenu) | [Sodium](https://modrinth.com/mod/sodium), [Sodium FPS Cap Fix](https://modrinth.com/mod/sodiumfpscapfix) |
 |  | NeoForge | None | [Cloth Config](https://modrinth.com/mod/cloth-config), [YACL](https://modrinth.com/mod/yacl) | [Sodium](https://modrinth.com/mod/sodium) |
 | 26.2 / 26.3 | Fabric | None | [Cloth Config](https://modrinth.com/mod/cloth-config), [YACL](https://modrinth.com/mod/yacl), [Mod Menu](https://modrinth.com/mod/modmenu) | [Sodium](https://modrinth.com/mod/sodium), [Sodium FPS Cap Fix](https://modrinth.com/mod/sodiumfpscapfix) |
 |  | NeoForge | None | [Cloth Config](https://modrinth.com/mod/cloth-config), [YACL](https://modrinth.com/mod/yacl) | [Sodium](https://modrinth.com/mod/sodium) |
 
-Optional settings libraries provide alternate configuration screens. NeoForge includes a native screen, and Fabric provides an in-game configuration keybind when either library is installed. Mod Menu adds a Fabric menu entry. The listed FPS-slider integrations are optional; AccurateFPS+ works without them. Optional-mod combinations are not all tested, and no dependencies are bundled.
+Fabric API is required only for Fabric on Minecraft 1.21.x. Cloth Config, YACL, Mod Menu, Sodium, and Sodium FPS Cap Fix are optional and are not bundled. Optional-mod combinations are not all tested.
 
-The 26.1.x jars support Minecraft 26.1, 26.1.1, and 26.1.2. Fabric API is required only on Fabric 1.21.x.
+> **Known issue - NeoForge 1.21.11:** Sodium 0.8.14 and 0.8.15-beta.1 crash during chunk rendering in `ShaderChunkRenderer.begin` (`ClassCastException: ValidationGpuTexture cannot be cast to GlTexture`). This is a Sodium/NeoForge renderer failure, not an AccurateFPS+ crash. AccurateFPS+ works on NeoForge 1.21.11 without Sodium.
 
----
+## Customize
 
-## Links & Modpack Policy
+- **HUD:** Toggle it in-game, hide it while F3 is open (on by default for new installs), choose Minimal, Competitive, Detailed, or Custom, and set its anchor, custom offsets, and size (1%–200%; 100% by default).
+- **Metrics:** Show or hide metrics, arrange them across the two HUD lines, and set 0–4 decimal places, prefixes, suffixes, colors, text shadow, and background.
+- **Telemetry:** Choose Real-Time, Averaged, or EMA calculations; set the polling interval and a 1, 3, 5, 10, 30, or 60-second history window. AVG, MAX, MIN, 1% Low, and 0.1% Low have independent refresh intervals; FPS and frametime share one.
+- **Coloring:** Choose automatic thresholds that adapt to gameplay or set manual Low, Medium, and High FPS thresholds. Manual thresholds stay ordered within 1–1,000 FPS when saved or loaded. Monitor detection sets High to your display's native refresh rate, Medium to 75%, and Low to 50%.
+- **Controls:** Set the HUD-toggle and preset-cycle keys in **Controls → Key Binds → AccurateFPS+**. The preset-cycle key is unbound by default.
 
-> **Modrinth is the recommended source for downloads, as releases are published there first and more frequently. Download the jar matching your Minecraft version and loader.**
+Settings are saved without restarting the game. Sampling pauses while the HUD is disabled, a screen is open, or F3 hides the HUD; frame gaps of one second or more are ignored.
 
-- **[Modrinth](https://modrinth.com/project/AQGahqU5)**
-- **[GitHub](https://github.com/gingermat24/AccurateFPS-plus)**
-- **[Report an issue or request a feature](https://github.com/gingermat24/AccurateFPS-plus/issues)**
-- Contact: Discord (`matteo.sb`)
+## FPS limit compatibility
 
-Have a request or a specific addition you'd like to see? Open a GitHub issue or contact me on Discord.
+AccurateFPS+ extends Minecraft's framerate limit to 1–1,000 FPS, in one-FPS steps, plus Unlimited. The selected limit is saved separately. If a recognized FPS-cap or textbox mod is installed (including Sodium FPS Cap Fix, FPS Cap Fix, or FPS Textbox), AccurateFPS+ leaves the vanilla slider to that mod. This avoids replacing its controls, but does not guarantee compatibility with every FPS mod.
 
-**MIT License** - Source code is available in this GitHub repository.
+## Developers and modpacks
 
-You are welcome to include AccurateFPS+ in any modpack, private or public. Please give credit and link back to the Modrinth project.
+See the [changelog](./CHANGELOG.md) for version-specific compatibility, implementation, tests, and benchmark details. Source code is available in this [GitHub repository](https://github.com/gingermat24/AccurateFPS-plus) under the MIT License.
 
----
-
-*Built with love by gingermat*
+You may include AccurateFPS+ in private or public modpacks. Please credit the project and link to [Modrinth](https://modrinth.com/project/AQGahqU5).

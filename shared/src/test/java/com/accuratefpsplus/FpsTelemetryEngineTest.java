@@ -81,6 +81,85 @@ class FpsTelemetryEngineTest {
     }
 
     @Test
+    void rollingStatisticsKeepTheCutoffSampleAndExpireItImmediatelyAfterward() {
+        FpsTelemetryEngine engine = new FpsTelemetryEngine(0L);
+        engine.setCalculationMode(0);
+        engine.onFrameAt(20L * NANOS_PER_MILLI, 1, 1, 1, 1, 1, 1, 1, 10L);
+        engine.onFrameAt(25L * NANOS_PER_MILLI, 1, 1, 1, 1, 1, 1, 1, 10L);
+        engine.onFrameAt(30L * NANOS_PER_MILLI, 1, 1, 1, 1, 1, 1, 1, 10L);
+
+        assertEquals(150.0, engine.getDisplayedAverageFps(), 1e-9);
+        assertEquals(200.0, engine.getDisplayedMaxFps(), 1e-9);
+        assertEquals(50.0, engine.getDisplayedMinFps(), 1e-9);
+
+        engine.onFrameAt(31L * NANOS_PER_MILLI, 1, 1, 1, 1, 1, 1, 1, 10L);
+
+        assertEquals((200.0 + 200.0 + 1_000.0) / 3.0, engine.getDisplayedAverageFps(), 1e-9);
+        assertEquals(1_000.0, engine.getDisplayedMaxFps(), 1e-9);
+        assertEquals(200.0, engine.getDisplayedMinFps(), 1e-9);
+    }
+
+    @Test
+    void rollingStatisticsStayCorrectAcrossRepeatedRefreshIntervalChanges() {
+        FpsTelemetryEngine engine = new FpsTelemetryEngine(0L);
+        engine.setCalculationMode(0);
+        List<Sample> samples = new ArrayList<>();
+        int[] intervals = {1, 4, 2, 6, 3};
+        long nowNanos = 0L;
+        long lastAverageUpdateNanos = 0L;
+        long lastMaxUpdateNanos = 0L;
+        long lastMinUpdateNanos = 0L;
+        double expectedAverage = 0.0;
+        double expectedMax = 0.0;
+        double expectedMin = 0.0;
+
+        for (int frame = 0; frame < 300; frame++) {
+            long frameDurationNanos = (1L + frame % 3) * NANOS_PER_MILLI;
+            nowNanos += frameDurationNanos;
+            long historyWindowMillis = 11L;
+            int averageInterval = intervals[frame % intervals.length];
+            int maxInterval = intervals[(frame + 1) % intervals.length];
+            int minInterval = intervals[(frame + 2) % intervals.length];
+            engine.onFrameAt(
+                nowNanos, 1, 1, averageInterval, maxInterval, minInterval, 1, 1, historyWindowMillis
+            );
+            samples.add(new Sample(nowNanos, 1.0E9 / frameDurationNanos));
+
+            long cutoffNanos = nowNanos - historyWindowMillis * NANOS_PER_MILLI;
+            double sum = 0.0;
+            double max = Double.NEGATIVE_INFINITY;
+            double min = Double.POSITIVE_INFINITY;
+            int count = 0;
+            for (Sample sample : samples) {
+                if (sample.timestampNanos() < cutoffNanos) {
+                    continue;
+                }
+                sum += sample.fps();
+                max = Math.max(max, sample.fps());
+                min = Math.min(min, sample.fps());
+                count++;
+            }
+
+            if (nowNanos - lastAverageUpdateNanos >= averageInterval * NANOS_PER_MILLI) {
+                expectedAverage = sum / count;
+                lastAverageUpdateNanos = nowNanos;
+            }
+            if (nowNanos - lastMaxUpdateNanos >= maxInterval * NANOS_PER_MILLI) {
+                expectedMax = max;
+                lastMaxUpdateNanos = nowNanos;
+            }
+            if (nowNanos - lastMinUpdateNanos >= minInterval * NANOS_PER_MILLI) {
+                expectedMin = min;
+                lastMinUpdateNanos = nowNanos;
+            }
+
+            assertEquals(expectedAverage, engine.getDisplayedAverageFps(), 1e-9, "average at frame " + frame);
+            assertEquals(expectedMax, engine.getDisplayedMaxFps(), 1e-9, "maximum at frame " + frame);
+            assertEquals(expectedMin, engine.getDisplayedMinFps(), 1e-9, "minimum at frame " + frame);
+        }
+    }
+
+    @Test
     void rollingStatisticsRespectHistoryWindowChanges() {
         FpsTelemetryEngine engine = new FpsTelemetryEngine(0L);
         engine.setCalculationMode(0);
@@ -245,6 +324,32 @@ class FpsTelemetryEngineTest {
 
         assertEquals(50.0, engine.getDisplayedOnePercentLow(), 1e-9);
         assertEquals(50.0, engine.getDisplayedZeroOnePercentLow(), 1e-9);
+    }
+
+    @Test
+    void percentileCollectionDoesNotChangeOtherTelemetryMetrics() {
+        FpsTelemetryEngine withoutPercentiles = new FpsTelemetryEngine(0L);
+        FpsTelemetryEngine withPercentiles = new FpsTelemetryEngine(0L);
+        withoutPercentiles.setCalculationMode(0);
+        withPercentiles.setCalculationMode(0);
+        withPercentiles.setComputePercentiles(true);
+        long[] frameDurations = {500_000L, 750_000L, 1_250_000L, 1_500_000L};
+        long nowNanos = 0L;
+
+        for (int frame = 0; frame < 500; frame++) {
+            nowNanos += frameDurations[frame % frameDurations.length];
+            withoutPercentiles.onFrameAt(nowNanos, 1, 1, 1, 1, 1, 1, 1, 100L);
+            withPercentiles.onFrameAt(nowNanos, 1, 1, 1, 1, 1, 1, 1, 100L);
+
+            assertEquals(withoutPercentiles.getDisplayedMainFps(), withPercentiles.getDisplayedMainFps(), 1e-9);
+            assertEquals(withoutPercentiles.getDisplayedFrametimeMs(), withPercentiles.getDisplayedFrametimeMs(), 1e-9);
+            assertEquals(withoutPercentiles.getDisplayedAverageFps(), withPercentiles.getDisplayedAverageFps(), 1e-9);
+            assertEquals(withoutPercentiles.getDisplayedMaxFps(), withPercentiles.getDisplayedMaxFps(), 1e-9);
+            assertEquals(withoutPercentiles.getDisplayedMinFps(), withPercentiles.getDisplayedMinFps(), 1e-9);
+        }
+
+        assertTrue(withPercentiles.getDisplayedOnePercentLow() > 0.0);
+        assertTrue(withPercentiles.getDisplayedZeroOnePercentLow() > 0.0);
     }
 
     @Test

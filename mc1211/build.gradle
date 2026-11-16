@@ -49,7 +49,7 @@ dependencies {
 	if (project.hasProperty("smokeYacl")) {
 		modLocalRuntime "maven.modrinth:yacl:${project.yacl_version}"
 		// Loom's dev run does not expose YACL's nested parser jars from the Modrinth Maven artifact.
-		runtimeOnly "org.quiltmc.parsers:gson:0.2.1"
+		runtimeOnly "org.quiltmc.parsers:gson:0.3.1"
 	}
 }
 

@@ -39,7 +39,7 @@ dependencies {
 	}
 	if (project.hasProperty("smokeYacl")) {
 		runtimeOnly "maven.modrinth:yacl:${project.yacl_version}"
-		runtimeOnly "org.quiltmc.parsers:gson:0.2.1"
+		runtimeOnly "org.quiltmc.parsers:gson:0.3.1"
 	}
 
 	testImplementation platform("org.junit:junit-bom:6.1.3")

@@ -10,12 +10,7 @@ public class FpsTelemetryEngine {
     private long pollTotalNanos;
     private int pollSampleCount;
     private final Deque<SamplePoint> sampledFps = new ArrayDeque<>();
-    private final Deque<SamplePoint> historySamples = new ArrayDeque<>();
-    private final Deque<SamplePoint> historyMaximums = new ArrayDeque<>();
-    private final Deque<SamplePoint> historyMinimums = new ArrayDeque<>();
-    private long statsHistoryWindowMillis = -1L;
-    private double historyFpsTotal;
-    private int historySampleCount;
+    private final RollingStatistics historyStatistics = new RollingStatistics();
     private long[] percentileTimestamps = new long[INITIAL_PERCENTILE_CAPACITY];
     private double[] percentileFrameFps = new double[INITIAL_PERCENTILE_CAPACITY];
     private double[] percentileScratch = new double[0];
@@ -146,7 +141,7 @@ public class FpsTelemetryEngine {
 
         long retainMillis = Math.max(historyWindowMillis, (long)Math.max(Math.max(mainIntervalMillis, averageIntervalMillis), Math.max(maxIntervalMillis, minIntervalMillis)));
         this.pruneOldSamples(nowNanos - retainMillis * NANOS_PER_MILLI - 1000L * NANOS_PER_MILLI);
-        this.updateHistoryStatistics(nowNanos, historyWindowMillis);
+        this.historyStatistics.update(nowNanos, historyWindowMillis, this.sampledFps);
         if (nowNanos - this.lastMainUpdateNanos >= (long)mainIntervalMillis * NANOS_PER_MILLI) {
             this.displayedMainFps = this.latestSampledFps;
             // Use actual measured frame duration, not FPS-derived approximation
@@ -158,15 +153,9 @@ public class FpsTelemetryEngine {
         boolean updateMax = nowNanos - this.lastMaxUpdateNanos >= (long)maxIntervalMillis * NANOS_PER_MILLI;
         boolean updateMin = nowNanos - this.lastMinUpdateNanos >= (long)minIntervalMillis * NANOS_PER_MILLI;
         if (updateAverage || updateMax || updateMin) {
-            double average = this.historySampleCount == 0
-                ? this.latestSampledFps
-                : this.historyFpsTotal / this.historySampleCount;
-            double max = this.historyMaximums.isEmpty()
-                ? this.latestSampledFps
-                : this.historyMaximums.peekFirst().fps;
-            double min = this.historyMinimums.isEmpty()
-                ? this.latestSampledFps
-                : this.historyMinimums.peekFirst().fps;
+            double average = this.historyStatistics.average(this.latestSampledFps);
+            double max = this.historyStatistics.maximum(this.latestSampledFps);
+            double min = this.historyStatistics.minimum(this.latestSampledFps);
             if (updateAverage) {
                 this.displayedAverageFps = average;
                 this.lastAverageUpdateNanos = nowNanos;
@@ -266,54 +255,6 @@ public class FpsTelemetryEngine {
         while (!this.sampledFps.isEmpty() && this.sampledFps.peekFirst().timestampNanos < cutoffNanos) {
             this.sampledFps.removeFirst();
         }
-    }
-
-    private void updateHistoryStatistics(long nowNanos, long historyWindowMillis) {
-        long cutoffNanos = nowNanos - historyWindowMillis * NANOS_PER_MILLI;
-        if (this.statsHistoryWindowMillis != historyWindowMillis) {
-            this.statsHistoryWindowMillis = historyWindowMillis;
-            this.historyFpsTotal = 0.0;
-            this.historySampleCount = 0;
-            this.historySamples.clear();
-            this.historyMaximums.clear();
-            this.historyMinimums.clear();
-            for (SamplePoint point : this.sampledFps) {
-                if (point.timestampNanos >= cutoffNanos) {
-                    this.addHistorySample(point);
-                }
-            }
-            return;
-        }
-
-        SamplePoint newest = this.sampledFps.peekLast();
-        if (newest != null && (this.historySamples.isEmpty() || this.historySamples.peekLast() != newest)) {
-            this.addHistorySample(newest);
-        }
-        while (!this.historySamples.isEmpty() && this.historySamples.peekFirst().timestampNanos < cutoffNanos) {
-            SamplePoint expired = this.historySamples.removeFirst();
-            this.historyFpsTotal -= expired.fps;
-            --this.historySampleCount;
-            if (!this.historyMaximums.isEmpty() && this.historyMaximums.peekFirst() == expired) {
-                this.historyMaximums.removeFirst();
-            }
-            if (!this.historyMinimums.isEmpty() && this.historyMinimums.peekFirst() == expired) {
-                this.historyMinimums.removeFirst();
-            }
-        }
-    }
-
-    private void addHistorySample(SamplePoint point) {
-        this.historySamples.addLast(point);
-        this.historyFpsTotal += point.fps;
-        ++this.historySampleCount;
-        while (!this.historyMaximums.isEmpty() && this.historyMaximums.peekLast().fps <= point.fps) {
-            this.historyMaximums.removeLast();
-        }
-        this.historyMaximums.addLast(point);
-        while (!this.historyMinimums.isEmpty() && this.historyMinimums.peekLast().fps >= point.fps) {
-            this.historyMinimums.removeLast();
-        }
-        this.historyMinimums.addLast(point);
     }
 
     private void addPercentileFrame(long timestampNanos, double fps, long historyWindowMillis) {
@@ -489,6 +430,75 @@ public class FpsTelemetryEngine {
         arr[j] = temp;
     }
 
-    private record SamplePoint(long timestampNanos, double fps) {
+    record SamplePoint(long timestampNanos, double fps) {
+    }
+
+    static final class RollingStatistics {
+        private final Deque<SamplePoint> samples = new ArrayDeque<>();
+        private final Deque<SamplePoint> maximums = new ArrayDeque<>();
+        private final Deque<SamplePoint> minimums = new ArrayDeque<>();
+        private long historyWindowMillis = -1L;
+        private double fpsTotal;
+        private int sampleCount;
+
+        void update(long nowNanos, long historyWindowMillis, Deque<SamplePoint> sampledFps) {
+            long cutoffNanos = nowNanos - historyWindowMillis * NANOS_PER_MILLI;
+            if (this.historyWindowMillis != historyWindowMillis) {
+                this.historyWindowMillis = historyWindowMillis;
+                this.fpsTotal = 0.0;
+                this.sampleCount = 0;
+                this.samples.clear();
+                this.maximums.clear();
+                this.minimums.clear();
+                for (SamplePoint point : sampledFps) {
+                    if (point.timestampNanos >= cutoffNanos) {
+                        this.add(point);
+                    }
+                }
+                return;
+            }
+
+            SamplePoint newest = sampledFps.peekLast();
+            if (newest != null && (this.samples.isEmpty() || this.samples.peekLast() != newest)) {
+                this.add(newest);
+            }
+            while (!this.samples.isEmpty() && this.samples.peekFirst().timestampNanos < cutoffNanos) {
+                SamplePoint expired = this.samples.removeFirst();
+                this.fpsTotal -= expired.fps;
+                --this.sampleCount;
+                if (!this.maximums.isEmpty() && this.maximums.peekFirst() == expired) {
+                    this.maximums.removeFirst();
+                }
+                if (!this.minimums.isEmpty() && this.minimums.peekFirst() == expired) {
+                    this.minimums.removeFirst();
+                }
+            }
+        }
+
+        double average(double fallback) {
+            return this.sampleCount == 0 ? fallback : this.fpsTotal / this.sampleCount;
+        }
+
+        double maximum(double fallback) {
+            return this.maximums.isEmpty() ? fallback : this.maximums.peekFirst().fps;
+        }
+
+        double minimum(double fallback) {
+            return this.minimums.isEmpty() ? fallback : this.minimums.peekFirst().fps;
+        }
+
+        private void add(SamplePoint point) {
+            this.samples.addLast(point);
+            this.fpsTotal += point.fps;
+            ++this.sampleCount;
+            while (!this.maximums.isEmpty() && this.maximums.peekLast().fps <= point.fps) {
+                this.maximums.removeLast();
+            }
+            this.maximums.addLast(point);
+            while (!this.minimums.isEmpty() && this.minimums.peekLast().fps >= point.fps) {
+                this.minimums.removeLast();
+            }
+            this.minimums.addLast(point);
+        }
     }
 }

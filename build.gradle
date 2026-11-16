@@ -49,7 +49,7 @@ dependencies {
 	if (project.hasProperty("smokeYacl")) {
 		modLocalRuntime "maven.modrinth:yacl:${project.yacl_version}"
 		// Loom's dev run does not expose YACL's nested parser jars from the Modrinth Maven artifact.
-		runtimeOnly "org.quiltmc.parsers:gson:0.2.1"
+		runtimeOnly "org.quiltmc.parsers:gson:0.3.1"
 	}
 }
 
@@ -68,6 +68,14 @@ dependencies {
 
 tasks.withType(Test).configureEach {
 	useJUnitPlatform()
+}
+
+tasks.register("benchmarkTelemetry", JavaExec) {
+	group = "verification"
+	description = "Benchmarks telemetry aggregation and percentile collection"
+	dependsOn tasks.named("testClasses")
+	classpath = sourceSets.test.runtimeClasspath
+	mainClass = "com.accuratefpsplus.FpsTelemetryBenchmark"
 }
 
 processResources {
@@ -297,6 +305,9 @@ tasks.register("verifyReleaseJars") {
 			"com/accuratefpsplus/ConfigScreenRouter.class",
 			"com/accuratefpsplus/YaclConfigScreen.class",
 			"com/accuratefpsplus/FpsTelemetryEngine.class",
+			'com/accuratefpsplus/FpsTelemetryEngine$RollingStatistics.class',
+			"com/accuratefpsplus/ConfigInputValidator.class",
+			"com/accuratefpsplus/ManualFpsThresholds.class",
 			"com/accuratefpsplus/ThresholdMode.class",
 			"com/accuratefpsplus/api/AccurateFpsApi.class",
 			"accuratefpsplus.sodium.mixins.json",

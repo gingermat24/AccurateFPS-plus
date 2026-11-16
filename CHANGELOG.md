@@ -1,11 +1,15 @@
 # Changelog
 
-## 1.4-r2 (in development)
+## 1.4-r2
 
 - Improved telemetry efficiency: AVG, MAX, and MIN now use rolling history aggregates instead of rescanning retained samples. Metric behavior is unchanged; this reduces repeated work when polling or refresh intervals are very short.
-- Added a deterministic 500-sample reference comparison for rolling AVG/MAX/MIN across expiration and history-window changes; covered sustained 1 ms polling, the inclusive percentile-window cutoff, and clearing percentile samples when collection is disabled.
+- Added deterministic regression coverage for rolling AVG/MAX/MIN at the inclusive history cutoff, repeated metric-refresh interval changes, sustained 1 ms polling, history-window changes, percentile collection disable/re-enable, and parity of non-percentile metrics with percentile collection on or off.
+- Added shared validation for NeoForge settings numeric and hexadecimal-color inputs, with tests for empty, malformed, and boundary values across both 1.21.x and 26.x screens.
+- Fixed manual color-threshold normalization so loaded or saved values remain strictly increasing and within the supported 1–1000 FPS range, including configurations at the upper boundary.
+- Added the developer-only `benchmarkTelemetry` Gradle task. It compares the production rolling AVG/MAX/MIN aggregator with the prior full-scan approach at a 1 ms update cadence, 500 retained samples, and continuous one-sample expiration; it also measures the current engine with percentile collection on and off using deterministic variable frame times averaging 1 ms. Results are local median timings without a CI performance threshold.
 - Matched NeoForge 26.x native settings text-field limits and numeric/color input filtering to the 1.21.x screen.
-- Updated the NeoForge 26.1.2 and 26.3 targets to NeoForge 26.1.2.126 and 26.3.0.101, respectively.
+- Updated the NeoForge 26.1.2 and 26.3 targets to NeoForge 26.1.2.126 and 26.3.0.103, respectively.
+- Updated target-compatible Fabric API, Fabric Loom, NeoForge, Mod Menu, Sodium 26.3, Gradle, and development parser dependencies. Retained Sodium 0.8.15-beta.1 for Minecraft 1.21.11 because no newer supported build is available and its NeoForge renderer incompatibility remains documented.
 
 ## 1.4-r1 - 31/10/2026 (12:10 italian time)
 
@@ -14,7 +18,7 @@
 - Added version-specific adapters for screen access, keyboard input, display refresh-rate detection, and HUD rendering. Kept a separate HUD Mixin configuration for 26.1 because its render hooks differ from 26.2 and 26.3.
 - Extended the FPS limit slider to 1–1000 FPS in one-FPS increments, followed by an Unlimited stop mapped to Minecraft's unlimited value. Updated Sodium's FPS formatter integration for the target method names: `lambda$fpsLimit$2` on 1.21.11 and `lambda$fpsLimit$0` on 26.x.
 - Made the Sodium FPS-range constant injections optional with `require=0`. Sodium 0.9.3-beta.1 for 26.3 now derives its range from Minecraft's `OptionInstance` instead of the legacy 260/10 constants; the injections still adjust versions such as Sodium 0.9.2 on 26.2 where those constants are present.
-- Fixed metric-visibility save callbacks so saving unchanged visibility values no longer switches the selected HUD preset to Custom. Registered the NeoForge 1.21.11 key category during the key-mapping event instead of using deprecated eager shared registration.
+- Fixed metric-visibility save callbacks so saving unchanged visibility values no longer switches the selected HUD preset to Custom. Registered the NeoForge 1.21.11 key category during the key-mapping event instead of using deprecated eager shared registration. 
 - Ported the native NeoForge settings screen to the 26.x screen and render-state APIs, including all settings pages, metric controls, validation, scrolling, preset handling, and JSON persistence. Registered the screen in the NeoForge 26.x Mods list through `IConfigScreenFactory`; Cloth Config and YACL remain optional alternative screens.
 - Added root tasks to aggregate and validate the ten release jars. CI builds and uploads the full target matrix. `buildAllVersions` and `verifyReleaseJars` completed successfully, including the project tests.
 - Updated Fabric Loader from 0.19.5 to 0.20.1 and Fabric Loom from 1.18.4 to 1.19.3 on 1.21.x and from 1.19.2 to 1.19.3 on 26.x. Updated NeoForge from 21.1.263 to 21.1.265 on 1.21.1, from 26.1.2.122 to 26.1.2.124 on 26.1.x, and from 26.3.0.95 to 26.3.0.99 on 26.3. NeoForge 21.11.48 and 26.2.0.93 were already current. Checked Fabric API, Cloth Config, YACL, Mod Menu, ModDevGradle, and JUnit pins; their existing versions were current for the supported targets.

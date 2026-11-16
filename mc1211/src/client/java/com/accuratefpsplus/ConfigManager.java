@@ -343,6 +343,7 @@ public class ConfigManager {
     }
 
     protected static void saveConfig() {
+        ConfigManager.normalizeManualThresholds();
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         Config currentConfig = new Config();
         currentConfig.configVersion = CURRENT_CONFIG_VERSION;
@@ -484,15 +485,18 @@ public class ConfigManager {
             AccurateFpsPlusClient.gradientColorMed = 0xFFFF55;
             AccurateFpsPlusClient.gradientColorHigh = 0x55FF55;
         }
-        AccurateFpsPlusClient.manualThresholdLow = Math.max(1, Math.min(1000, AccurateFpsPlusClient.manualThresholdLow));
-        AccurateFpsPlusClient.manualThresholdMed = Math.max(1, Math.min(1000, AccurateFpsPlusClient.manualThresholdMed));
-        AccurateFpsPlusClient.manualThresholdHigh = Math.max(1, Math.min(1000, AccurateFpsPlusClient.manualThresholdHigh));
-        if (AccurateFpsPlusClient.manualThresholdMed <= AccurateFpsPlusClient.manualThresholdLow) {
-            AccurateFpsPlusClient.manualThresholdMed = AccurateFpsPlusClient.manualThresholdLow + 1;
-        }
-        if (AccurateFpsPlusClient.manualThresholdHigh <= AccurateFpsPlusClient.manualThresholdMed) {
-            AccurateFpsPlusClient.manualThresholdHigh = AccurateFpsPlusClient.manualThresholdMed + 1;
-        }
+        ConfigManager.normalizeManualThresholds();
+    }
+
+    private static void normalizeManualThresholds() {
+        ManualFpsThresholds thresholds = ManualFpsThresholds.normalize(
+            AccurateFpsPlusClient.manualThresholdLow,
+            AccurateFpsPlusClient.manualThresholdMed,
+            AccurateFpsPlusClient.manualThresholdHigh
+        );
+        AccurateFpsPlusClient.manualThresholdLow = thresholds.low();
+        AccurateFpsPlusClient.manualThresholdMed = thresholds.medium();
+        AccurateFpsPlusClient.manualThresholdHigh = thresholds.high();
     }
 
     private static String emptyIfNull(String value) {

@@ -338,17 +338,17 @@ public final class NativeConfigScreen extends Screen {
         Component label = Component.translatable(labelKey);
         EditBox field = new EditBox(this.font, controlX(), rowY(row), controlWidth(), 20, label);
         field.setMaxLength(10);
-        field.setFilter(value -> digitsOnly(value));
+        field.setFilter(ConfigInputValidator::digitsOnly);
         field.setValue(Integer.toString(initialValue));
         field.setResponder(value -> {
-            Integer parsed = parseInteger(value, min, max);
+            Integer parsed = ConfigInputValidator.parseInteger(value, min, max);
             if (parsed != null) {
                 setter.accept(parsed);
                 this.validationMessage = null;
             }
         });
         addControl(targetPage, targetMetric, row, label, field,
-            () -> parseInteger(field.getValue(), min, max) != null);
+            () -> ConfigInputValidator.parseInteger(field.getValue(), min, max) != null);
     }
 
     private void addColor(int targetPage, int targetMetric, int row, String labelKey,
@@ -356,16 +356,17 @@ public final class NativeConfigScreen extends Screen {
         Component label = Component.translatable(labelKey);
         EditBox field = new EditBox(this.font, controlX(), rowY(row), controlWidth(), 20, label);
         field.setMaxLength(6);
-        field.setFilter(NativeConfigScreen::hexDigitsOnly);
+        field.setFilter(ConfigInputValidator::hexDigitsOnly);
         field.setValue(String.format("%06X", initialValue & 0xFFFFFF));
         field.setResponder(value -> {
-            if (value.length() == 6) {
-                setter.accept(Integer.parseInt(value, 16));
+            Integer parsed = ConfigInputValidator.parseColor(value);
+            if (parsed != null) {
+                setter.accept(parsed);
                 this.validationMessage = null;
             }
         });
         addControl(targetPage, targetMetric, row, label, field,
-            () -> field.getValue().length() == 6);
+            () -> ConfigInputValidator.parseColor(field.getValue()) != null);
     }
 
     private void addString(int targetPage, int targetMetric, int row, String labelKey,
@@ -524,39 +525,6 @@ public final class NativeConfigScreen extends Screen {
 
     private int rowY(int row) {
         return CONTENT_TOP + (row - this.scrollRows) * ROW_HEIGHT;
-    }
-
-    private static Integer parseInteger(String value, int min, int max) {
-        if (value.isEmpty()) {
-            return null;
-        }
-        try {
-            int parsed = Integer.parseInt(value);
-            return parsed >= min && parsed <= max ? parsed : null;
-        } catch (NumberFormatException ignored) {
-            return null;
-        }
-    }
-
-    private static boolean digitsOnly(String value) {
-        for (int i = 0; i < value.length(); i++) {
-            if (!Character.isDigit(value.charAt(i))) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static boolean hexDigitsOnly(String value) {
-        for (int i = 0; i < value.length(); i++) {
-            char character = value.charAt(i);
-            if (!Character.isDigit(character)
-                && (character < 'a' || character > 'f')
-                && (character < 'A' || character > 'F')) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private static int historyWindowIndex(int seconds) {
